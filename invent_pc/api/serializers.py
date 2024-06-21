@@ -1,11 +1,10 @@
-from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 from rest_framework import serializers
 
-from comps.models import (Comp, Disk, ItemsChoices,  # isort: skip
-                          Ram, Monitor, WebCamera,  # isort: skip
-                          Department, Host, VirtualMachine,  # isort: skip
-                          VMAdapter)  # isort: skip
+from invent_pc.comps.models import (Comp, Department, Disk, Host, ItemsChoices,
+                                    Monitor, Ram, VirtualMachine, VMAdapter,
+                                    WebCamera)
 
 
 class DiskSerializer(serializers.ModelSerializer):
