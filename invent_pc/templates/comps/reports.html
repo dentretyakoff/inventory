@@ -1,0 +1,60 @@
+<!-- templates/reports.html -->
+
+{% extends 'base.html' %}
+{% block title %}
+  Общая статистика
+{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    <h1>Общая статистика</h1>
+      Всего компьютеров: {{ comps_count }}
+      <p>
+        {% for item, count in count_by_os_arch.items %}
+        <a
+          href="{% url 'comps:comps_by_item' item_type='os_arch' %}?item={{ item }}"
+        >{{ item }}</a> - {{ count }}, 
+        {% endfor %}
+      </p>
+      <div class="col-md-5 p-6">
+        <h3>Материнские платы</h3>
+        <ul class="list-group">
+          {% for item, count in count_by_motherboard.items %}
+            <li class="custom-list-item">
+              <span class="custom-list-item-name">
+                <a
+                  href="{% url 'comps:comps_by_item' item_type='motherboard' %}?item={{ item }}"
+                >{{ item }}</a>
+              </span>
+              <span class="custom-list-item-value">{{ count }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <h3>Операционные системы</h3>
+        <ul>
+          {% for item, count in count_by_win_ver.items %}
+            <li class="custom-list-item">
+              <span class="custom-list-item-name">
+                <a
+                  href="{% url 'comps:comps_by_item' item_type='win_ver' %}?item={{ item }}"
+                >{{ item }}</a>
+              </span>
+              <span class="custom-list-item-value">{{ count }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+        <h3>Процессоры</h3>
+        <ul>
+          {% for item, count in count_by_cpu.items %}
+            <li class="custom-list-item">
+              <span class="custom-list-item-name">
+                <a
+                  href="{% url 'comps:comps_by_item' item_type='cpu' %}?item={{ item }}"
+                >{{ item }}</a>
+              </span>
+              <span class="custom-list-item-value">{{ count }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+    </div>
+  </div>
+{% endblock %}

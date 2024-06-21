@@ -1,0 +1,68 @@
+<!-- templates/index.html -->
+
+{% extends 'base.html' %}
+{% block title %}
+  Список всех компьютеров
+{% endblock %}
+{% block content %}
+  <div class="container-fluid py-3 custom-container">
+      <!-- <div class="container mt-4 justify-content-end"></div> -->
+      <div class="container">
+        <div class="row gy-4">
+        <h1>Список компьютеров: {{ page_obj|length }}</h1>
+          <div class="col">
+            <form class="text-right" method="get">
+              <div class="btn-group" role="group" aria-label="Basic example">
+                <!-- class="btn btn-secondary btn-sm" -->
+                <button type="submit" class="btn btn btn-primary btn-sm" name="filter" value="disks">Диски</button>
+                <button type="submit" class="btn btn btn-primary btn-sm" name="filter" value="rams">ОЗУ</button>
+                <button type="submit" class="btn btn btn-primary btn-sm" name="filter" value="monitors">Мониторы</button>
+              </div>
+              <p><small>Компьютеры с оборудованием в статусе "Потерян"</small></p>
+            </form>
+          </div>
+          <div class="col">
+            <form method="get">
+              {{ filter_form.as_p }}
+              <button class="btn btn-primary btn-sm" type="submit">Фильтровать по департаменту</button>
+            <!-- <div class="dropdown">
+              <button class="btn btn-primary dropdown-toggle" type="button" id="departmentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Выберите департамент
+              </button>
+              <div class="dropdown-menu" aria-labelledby="departmentDropdown">
+                {% for department in filter_form.department.field.queryset %}
+                  <a class="dropdown-item" href="?department={{ department.pk }}">{{ department.name }}</a>
+                {% endfor %}
+              </div>
+            </div> -->
+            </form>
+          </div>
+          <div class="col">
+            <form method="get">
+              <div class="input-group mb-3">
+                <input 
+                  type="text" class="form-control" placeholder="Поиск по имени ПК" aria-label="Поиск по имени ПК"
+                  aria-describedby="button-addon2" name="search_query"
+                >
+                <button class="btn btn-primary btn-sm" type="submit" id="button-addon2">Поиск</button>
+              </div>
+            </form>
+          </div>
+          <div class="col">
+            <form method="get">
+              <div class="input-group mb-3">
+                <button class="btn btn-primary btn-sm" type="submit" id="button-addon2">Найти ПК старше</button>
+                <input
+                  type="text" class="form-control" placeholder="дней" aria-label="Поиск старых ПК"
+                  aria-describedby="button-addon2" name="older_days"
+                >
+                <!-- <button type="submit" class="btn btn-primary btn-sm" name="filter" value="older_pc">Найти старые ПК</button> -->
+              </div>
+            </form>
+          </div>
+      </div>
+  </div>
+    {% include 'includes/table_comps.html' %}
+    {% include 'comps/includes/paginator.html' %}
+  </div>
+{% endblock %}

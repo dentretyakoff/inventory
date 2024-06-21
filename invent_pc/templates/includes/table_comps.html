@@ -1,0 +1,69 @@
+<!-- templates/includes/table_comps.html -->
+
+<table class="table table-striped table-hover">
+    <tr>
+      <!-- <th>ID</th> -->
+      <th>Имя ПК</th>
+      <th>
+        <p class="custom-p">Дата добавления</p>
+        <p class="custom-p">Последний онлайн</p>
+      </th>
+      <th>Версия ОС</th>
+      <th>Архитектура ОС</th>
+      <th>Процессор</th>
+      <th>Материнская плата</th>
+      <th>RAM</th>
+      <th>HDD/SSD</th>
+      <th>Монитор</th>
+      <th>Веб-камера</th>
+    </tr>
+    {% for comp in page_obj %}
+      <tr> 
+        <!-- <td>{{ comp.id }}</td> -->
+        <td>
+          <a
+            href="{% url 'comps:comp_detail' comp.pc_name %}"
+          >{{ comp.pc_name }}</a>
+          {% if comp.is_offline_long_time %}
+            <a class="btn btn-danger btn-sm" 
+              href="{% url 'comps:comp_delete' comp.pc_name %}"
+            >
+              Удалить
+            </a>
+          {% endif %}
+        </td>
+        <td>
+          <p class="small custom-p">{{ comp.add_date|date:"d.m.Y H:i" }}</p>
+          <p class="small custom-p">{{ comp.online_date|date:"d.m.Y H:i" }}</p>
+        </td>
+        <td>{{ comp.win_ver }}</td>
+        <td>{{ comp.os_arch }}</td>
+        <td>{{ comp.cpu }}</td>
+        <td>{{ comp.motherboard }}</td>
+        <td>
+          {% for ram in comp.rams.all %}
+            {% if ram.status != 'uninstalled' %}
+              <p class="{% if ram.status == 'lost' %}blinking-text{% endif %} custom-p">{{ ram }}</p>
+            {% endif %}
+          {% endfor %}
+        </td>
+        <td>
+          {% for disk in comp.disks.all %}
+            {% if disk.status != 'uninstalled' %}
+              <p class="{% if disk.status == 'lost' %}blinking-text{% endif %} custom-p">{{ disk }}</p>
+            {% endif %}
+          {% endfor %}
+        </td>
+        <td>
+          {% for monitor in comp.monitors.all %}
+            {% if monitor.status != 'uninstalled' %}
+              <p class="{% if monitor.status == 'lost' %}blinking-text{% endif %}">{{ monitor }}</p>
+            {% endif %}
+          {% endfor %}
+        </td>
+        <td>
+          {{ comp.web_camera|truncatechars:40 }}
+        </td>
+      </tr>
+    {% endfor %}
+  </table>

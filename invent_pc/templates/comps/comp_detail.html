@@ -1,0 +1,191 @@
+<!-- templates/posts/post_detail.html -->
+
+{% extends 'base.html' %}
+{% block title %}
+  Компьютер {{ comp.pc_name}}
+{% endblock %}
+{% block content %}
+  <!-- <div class="container-lg py-5 custom-container"> -->
+  <div class="py-5 custom-container">
+    <!-- <a class="btn btn-primary"
+      href="{% url 'comps:index' %}"
+    >
+      На главную
+    </a> -->
+    <h1>
+      Детали компьютера
+    </h1>
+    <div class="row">
+      <div class="col-md-4">
+        <ul class="list-group">
+          <li class="custom-list-item">
+            Имя компютера: <b><span>{{ comp.pc_name }}</span></b>
+            <a class="btn btn-danger btn-sm"
+              href="{% url 'comps:comp_delete' comp.pc_name %}"
+            >
+              Удалить
+            </a>
+          </li>
+          <li class="custom-list-item">
+            <span class="custom-list-item-name">Дата добавления:</span>
+            <span class="custom-list-item-value">{{ comp.add_date|date:"d E Y" }}</span>
+          </li>
+          <li class="custom-list-item {% if comp.is_offline_long_time %} blinking-text {% endif %}">
+            <span class="custom-list-item-name">Дата онлайн:</span>
+            <span class="custom-list-item-value">{{ comp.online_date|date:"d E Y" }}</span>
+          </li>
+          <li class="custom-list-item">
+            <span class="custom-list-item-name">Департамент:</span>
+            <span class="custom-list-item-value">{{ comp.department }}</span>
+          </li>
+          <li class="custom-list-item">
+            <span class="custom-list-item-name">Версия ОС:</span>
+            <span class="custom-list-item-value">{{ comp.win_ver }}</span>
+          </li>
+          <li class="custom-list-item">
+            <span class="custom-list-item-name">Архитектура ОС:</span>
+            <span class="custom-list-item-value">{{ comp.os_arch }}</span>
+          </li>
+          <li class="custom-list-item">
+            <span class="custom-list-item-name">Процессор:</span>
+            <span class="custom-list-item-value">{{ comp.cpu }}</span>
+          </li>
+          <li class="custom-list-item">
+            <span class="custom-list-item-name">Материнская плата:</span>
+            <span class="custom-list-item-value">{{ comp.motherboard }}</span>
+          </li>
+          <!-- <li class="custom-list-item">
+            <span class="custom-list-item-name">Монитор:</span>
+            <span class="custom-list-item-value">{{ comp.monitor }}</span>
+          </li> -->
+          <li class="custom-list-item">
+            <span class="custom-list-item-name">Веб-камера:</span>
+            <span class="custom-list-item-value">{{ comp.web_camera }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6>Диски</h6>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Модель</th>
+              <th>Объем</th>
+              <th>S/N</th>
+              <th>Статус</th>
+              <th>Установлен</th>
+              <th>Снят/Потерян</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for disk in comp.disks.all %}
+              <tr class="{% if disk.status == 'installed' %}table-success{% elif disk.status == 'lost' %}table-danger{% else %}table-secondary{% endif %}">
+                <td>{{ disk.model }}</td>
+                <td>{{ disk.capacity }}</td>
+                <td>{{ disk.serial_number }}</td>
+                <td>{{ disk.get_status_display }}</td>
+                <td>{{ disk.install_date|date:"d.m.Y H:i" }}</td>
+                <td>{{ disk.uninstall_date|date:"d.m.Y H:i" }}</td>
+                <td>
+                  {% if disk.status == 'uninstalled' %}
+                    <a class="btn btn-primary btn-sm"
+                      href="{% url 'comps:item_edit' pc_name=comp.pc_name item='disk' item_status='installed' item_id=disk.id %}"
+                    >Установить</a>
+                  {% else %}
+                    <a class="btn btn-primary btn-sm"
+                      href="{% url 'comps:item_edit' pc_name=comp.pc_name item='disk' item_status='uninstalled' item_id=disk.id %}"
+                    >Снять</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+      </div>
+      <div class="col-md-6">
+        <h6>Оперативная память</h6>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Модель</th>
+              <th>Объем</th>
+              <th>S/N</th>
+              <th>Статус</th>
+              <th>Установлен</th>
+              <th>Снят/Потерян</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ram in comp.rams.all %}
+              <tr class="{% if ram.status == 'installed' %}table-success{% elif ram.status == 'lost' %}table-danger{% else %}table-secondary{% endif %}">
+                <td>{{ ram.model }}</td>
+                <td>{{ ram.capacity }}</td>
+                <td>{{ ram.serial_number }}</td>
+                <td>{{ ram.get_status_display }}</td>
+                <td>{{ ram.install_date|date:"d.m.Y H:i" }}</td>
+                <td>{{ ram.uninstall_date|date:"d.m.Y H:i" }}</td>
+                <td>
+                  {% if ram.status == 'uninstalled' %}
+                    <a class="btn btn-primary btn-sm"
+                      href="{% url 'comps:item_edit' pc_name=comp.pc_name item='ram' item_status='installed' item_id=ram.id %}"
+                    >Установить</a>
+                  {% else %}
+                    <a class="btn btn-primary btn-sm"
+                      href="{% url 'comps:item_edit' pc_name=comp.pc_name item='ram' item_status='uninstalled' item_id=ram.id %}"
+                    >Снять</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+      </div>
+      <div class="col-md-6">
+        <h6>Мониторы</h6>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Модель</th>
+              <th>Производитель</th>
+              <th>S/N</th>
+              <th>Статус</th>
+              <th>Установлен</th>
+              <th>Снят/Потерян</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for monitor in comp.monitors.all %}
+              <tr class="{% if monitor.status == 'installed' %}table-success{% elif monitor.status == 'lost' %}table-danger{% else %}table-secondary{% endif %}">
+                <td>{{ monitor.model }}</td>
+                <td>{{ monitor.manufacturer }}</td>
+                <td>{{ monitor.serial_number }}</td>
+                <td>{{ monitor.get_status_display }}</td>
+                <td>{{ monitor.install_date|date:"d.m.Y H:i" }}</td>
+                <td>{{ monitor.uninstall_date|date:"d.m.Y H:i" }}</td>
+                <td>
+                  {% if monitor.status == 'uninstalled' %}
+                    <a class="btn btn-primary btn-sm"
+                      href="{% url 'comps:item_edit' pc_name=comp.pc_name item='monitor' item_status='installed' item_id=monitor.id %}"
+                    >Установить</a>
+                  {% else %}
+                    <a class="btn btn-primary btn-sm"
+                      href="{% url 'comps:item_edit' pc_name=comp.pc_name item='monitor' item_status='uninstalled' item_id=monitor.id %}"
+                    >Снять</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

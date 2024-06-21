@@ -1,0 +1,37 @@
+# Файл docker-compose.yml
+version: '3'
+
+volumes:
+  pg_data:
+  static:
+
+services:
+  db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  backend:
+    build: ./invent_pc/
+    env_file: .env
+    volumes:
+      - static:/backend_static
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        cp -r /app/collected_static/. /backend_static/ &&
+        cp -r /app/static/. /backend_static/ &&
+        gunicorn --bind 0.0.0.0:8000 invent_pc.wsgi"
+    depends_on:
+      - db
+  gateway:
+    build: ./gateway/
+    volumes:
+      - static:/static/
+    ports:
+      - 8000:80
+    depends_on:
+      - backend

@@ -1,0 +1,28 @@
+<!-- templates/departments.html -->
+
+{% extends 'base.html' %}
+{% block title %}
+  Департаменты
+{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    <h1>Департаменты</h1>
+      <div class="col-md-5 p-6">
+        <ul class="list-group">
+          {% for department in departments %}
+              <li class="custom-list-item">
+                <span class="custom-list-item-name">{{ department }}:</span>
+                {% if not department.comp.count %}
+                <a class="btn btn-danger btn-sm" 
+                  href="{% url 'comps:department_delete' department.id %}"
+                >
+                  -
+                </a>
+                {% endif %}
+                <span class="custom-list-item-value">&nbsp;{{ department.comp.count }}</span>
+              </li>
+          {% endfor %}
+        </ul>
+    </div>
+  </div>
+{% endblock %}

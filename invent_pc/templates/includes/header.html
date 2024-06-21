@@ -1,0 +1,45 @@
+<!-- templates/includes/header.html -->
+
+<nav class="navbar navbar-light" style="background-color: lightskyblue">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'comps:index' %}">
+      {% load static %}
+      <img
+        src="{% static 'img/logo.png' %}"
+        width="60"
+        height="30"
+        class="d-inline-block align-top"
+        alt="">
+      Renewal Inventory
+    </a>
+    <ul class="nav nav-pills">
+      {% with request.resolver_match.view_name as view_name %}
+        <li> 
+          <a class="nav-link {% if view_name  == 'comps:departments' %}active{% endif %}"
+            href="{% url 'comps:departments' %}"
+          >
+            Департаменты
+          </a>
+        </li>
+      {% endwith %}
+      {% with request.resolver_match.view_name as view_name %}
+        <li> 
+          <a class="nav-link {% if view_name  == 'comps:vms' %}active{% endif %}"
+            href="{% url 'comps:vms' %}"
+          >
+            Гипервизоры
+          </a>
+        </li>
+      {% endwith %}
+      {% with request.resolver_match.view_name as view_name %}
+        <li> 
+          <a class="nav-link {% if view_name  == 'comps:reports' %}active{% endif %}"
+            href="{% url 'comps:reports' %}"
+          >
+            Отчеты
+          </a>
+        </li>
+      {% endwith %}
+    </ul>
+  </div>
+</nav>
