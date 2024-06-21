@@ -33,7 +33,7 @@ foreach ($dir in $logs_dirs){
     }    
 }
 
-$comps = Get-ADComputer -Properties lastLogonTimestamp -Filter * -SearchBase "OU=Компьютеры домена,DC=med,DC=local" | Where-Object {($_.enabled -eq $true) -and ($_.DistinguishedName -notlike "*OU=Промышленные компьютеры,*")}
+$comps = Get-ADComputer -Properties lastLogonTimestamp -Filter * -SearchBase "OU=Компьютеры домена,DC=company,DC=local" | Where-Object {($_.enabled -eq $true) -and ($_.DistinguishedName -notlike "*OU=Промышленные компьютеры,*")}
 
 $current_date = Get-Date -Format 'dd.MM.yyyy-HHmmss'
 
