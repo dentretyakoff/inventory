@@ -4,7 +4,7 @@ Django
 DRF
 
 - Краткая инструкция:
-    - клонируйте репозиторий: `git clone git@gitflic.ru:dentretyakoff/invent_pc.git`
+    - клонируйте репозиторий: `git clone git@github.com:dentretyakoff/inventory.git`
     - установите docker
         ```
         sudo apt update
