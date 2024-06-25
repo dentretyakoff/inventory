@@ -55,6 +55,19 @@
             </li>
           {% endfor %}
         </ul>
+        <h3>Диски</h3>
+        <ul>
+          {% for item, count in count_by_disks.items %}
+            <li class="custom-list-item">
+              <span class="custom-list-item-name">
+                <a
+                  href="{% url 'comps:comps_by_item' item_type='disk' %}?item={{ item }}"
+                >{{ item }}</a>
+              </span>
+              <span class="custom-list-item-value">{{ count }}</span>
+            </li>
+          {% endfor %}
+        </ul>
     </div>
   </div>
 {% endblock %}

@@ -4,7 +4,6 @@ from datetime import timedelta
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Count
-from django.conf import settings
 
 from .models import (Comp, Disk, ItemsChoices,
                      Monitor, Ram, Department,
@@ -27,9 +26,6 @@ def index(request):
     if item == 'monitors':
         comps = Comp.objects.filter(
             monitors__status=ItemsChoices.LOST).distinct()
-    # if item == 'older_pc':
-    #     comps = Comp.objects.filter(online_date__lte=timezone.now()
-    #                                 - timedelta(days=settings.DAYS_OFFLINE))
 
     if filter_form.is_valid() and filter_form.cleaned_data.get('department'):
         department_id = filter_form.cleaned_data.get('department')
@@ -109,14 +105,16 @@ def reports(request):
         item['os_arch'] for item in Comp.objects.values('os_arch')))
     count_by_cpu = dict(Counter(
         item['cpu'] for item in Comp.objects.values('cpu')))
-    # count_by_cpu = Comp.objects.order_by(
-    #     'cpu').distinct('cpu')
+    count_by_disks = dict(Counter(
+        item['model'] for item in Disk.objects.filter(
+            status=ItemsChoices.INSTALLED).values('model')))
     context = {
         'comps_count': comps_count,
         'count_by_motherboard': count_by_motherboard,
         'count_by_win_ver': count_by_win_ver,
         'count_by_os_arch': count_by_os_arch,
-        'count_by_cpu': count_by_cpu
+        'count_by_cpu': count_by_cpu,
+        'count_by_disks': count_by_disks
     }
     return render(request, 'comps/reports.html', context)
 
@@ -124,15 +122,23 @@ def reports(request):
 def comps_by_item(request, item_type):
     """Список компьютеров с выбранным оборудованием."""
     item = request.GET.get('item')
+    filter_form = DepartmentFilterForm(request.GET)
     item_types = {
         'os_arch': Comp.objects.filter(os_arch=item),
         'motherboard': Comp.objects.filter(motherboard=item),
         'win_ver': Comp.objects.filter(win_ver=item),
-        'cpu': Comp.objects.filter(cpu=item)
+        'cpu': Comp.objects.filter(cpu=item),
+        'disk': Comp.objects.filter(
+            disks__model=item,
+            disks__status=ItemsChoices.INSTALLED).distinct()
     }
     comps = item_types.get(item_type, [])
+    if filter_form.is_valid() and filter_form.cleaned_data.get('department'):
+        department_id = filter_form.cleaned_data.get('department')
+        comps = comps.filter(department=department_id)
     page_obj = get_pages(request, comps, len(comps)+1)
     context = {'page_obj': page_obj,
+               'filter_form': filter_form,
                'item': item}
     return render(request, 'comps/comps_by_items.html', context)
 

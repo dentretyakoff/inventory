@@ -12,6 +12,15 @@
     >
       Назад
     </a>
+    <form method="get">
+      {% for key, value in request.GET.items %}
+        {% if key != 'department' %}
+          <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+      {% endfor %}
+      {{ filter_form.as_p }}
+      <button class="btn btn-primary btn-sm" type="submit">Фильтровать</button>
+    </form>
   </div>
   <div class="container-fluid py-3 custom-container">
     {% include 'includes/table_comps.html' %}

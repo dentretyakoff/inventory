@@ -2,9 +2,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from rest_framework import serializers
 
-from invent_pc.comps.models import (Comp, Department, Disk, Host, ItemsChoices,
-                                    Monitor, Ram, VirtualMachine, VMAdapter,
-                                    WebCamera)
+from comps.models import (Comp, Department, Disk, Host, ItemsChoices, Monitor,
+                          Ram, VirtualMachine, VMAdapter, WebCamera)
 
 
 class DiskSerializer(serializers.ModelSerializer):
