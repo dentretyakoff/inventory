@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from .models import (Comp, Disk, ItemsChoices,
                      Monitor, Ram, Department,
@@ -130,19 +130,19 @@ def reports(request):
 def comps_by_item(request, item_type):
     """Список компьютеров с выбранным оборудованием."""
     item = request.GET.get('item')
+    department_id = request.GET.get('department')
     filter_form = DepartmentFilterForm(request.GET)
     item_types = {
-        'os_arch': Comp.objects.filter(os_arch=item),
-        'motherboard': Comp.objects.filter(motherboard=item),
-        'win_ver': Comp.objects.filter(win_ver=item),
-        'cpu': Comp.objects.filter(cpu=item),
-        'disk': Comp.objects.filter(
-            disks__model=item,
-            disks__status=ItemsChoices.INSTALLED).distinct()
+        'os_arch': Q(os_arch=item),
+        'motherboard': Q(motherboard=item),
+        'win_ver': Q(win_ver=item),
+        'cpu': Q(cpu=item),
+        'disk': Q(disks__model=item, disks__status=ItemsChoices.INSTALLED),
     }
-    comps = item_types.get(item_type, [])
-    if filter_form.is_valid() and filter_form.cleaned_data.get('department'):
-        department_id = filter_form.cleaned_data.get('department')
+    comps = Comp.objects.filter(item_types.get(item_type, Q()))
+    if item_type == 'disk':
+        comps = comps.distinct()
+    if department_id:
         comps = comps.filter(department=department_id)
     page_obj = get_pages(request, comps, len(comps)+1)
     context = {'page_obj': page_obj,
