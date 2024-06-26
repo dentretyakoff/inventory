@@ -34,7 +34,7 @@ def index(request):
     if search_form.is_valid():
         if search_form.cleaned_data.get('search_query'):
             pc_name = search_form.cleaned_data.get('search_query')
-            comps = comps.filter(pc_name__iexact=pc_name)
+            comps = comps.filter(pc_name__icontains=pc_name)
         if search_form.cleaned_data.get('older_days'):
             days = search_form.cleaned_data.get('older_days')
             comps = Comp.objects.filter(online_date__lte=timezone.now()
