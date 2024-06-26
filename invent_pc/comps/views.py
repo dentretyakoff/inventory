@@ -96,25 +96,33 @@ def item_edit(request, pc_name, item, item_status, item_id):
 
 def reports(request):
     """Общая статистика."""
-    comps_count = Comp.objects.all().count()
+    department_id = request.GET.get('department')
+    filter_form = DepartmentFilterForm(request.GET)
+    if department_id:
+        comps = Comp.objects.filter(department=department_id)
+        disks = Disk.objects.filter(status=ItemsChoices.INSTALLED,
+                                    comp__department=department_id)
+    else:
+        comps = Comp.objects.all()
+        disks = Disk.objects.filter(status=ItemsChoices.INSTALLED)
     count_by_motherboard = dict(Counter(
-        item['motherboard'] for item in Comp.objects.values('motherboard')))
+        item['motherboard'] for item in comps.values('motherboard')))
     count_by_win_ver = dict(Counter(
-        item['win_ver'] for item in Comp.objects.values('win_ver')))
+        item['win_ver'] for item in comps.values('win_ver')))
     count_by_os_arch = dict(Counter(
-        item['os_arch'] for item in Comp.objects.values('os_arch')))
+        item['os_arch'] for item in comps.values('os_arch')))
     count_by_cpu = dict(Counter(
-        item['cpu'] for item in Comp.objects.values('cpu')))
+        item['cpu'] for item in comps.values('cpu')))
     count_by_disks = dict(Counter(
-        item['model'] for item in Disk.objects.filter(
-            status=ItemsChoices.INSTALLED).values('model')))
+        item['model'] for item in disks.values('model')))
     context = {
-        'comps_count': comps_count,
+        'comps_count': comps.count(),
         'count_by_motherboard': count_by_motherboard,
         'count_by_win_ver': count_by_win_ver,
         'count_by_os_arch': count_by_os_arch,
         'count_by_cpu': count_by_cpu,
-        'count_by_disks': count_by_disks
+        'count_by_disks': count_by_disks,
+        'filter_form': filter_form,
     }
     return render(request, 'comps/reports.html', context)
 

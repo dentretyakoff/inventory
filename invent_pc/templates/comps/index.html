@@ -22,20 +22,7 @@
             </form>
           </div>
           <div class="col">
-            <form method="get">
-              {{ filter_form.as_p }}
-              <button class="btn btn-primary btn-sm" type="submit">Фильтровать по департаменту</button>
-            <!-- <div class="dropdown">
-              <button class="btn btn-primary dropdown-toggle" type="button" id="departmentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Выберите департамент
-              </button>
-              <div class="dropdown-menu" aria-labelledby="departmentDropdown">
-                {% for department in filter_form.department.field.queryset %}
-                  <a class="dropdown-item" href="?department={{ department.pk }}">{{ department.name }}</a>
-                {% endfor %}
-              </div>
-            </div> -->
-            </form>
+            {% include 'includes/filter_department.html' %}
           </div>
           <div class="col">
             <form method="get">

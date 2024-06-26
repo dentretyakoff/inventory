@@ -7,20 +7,7 @@
 {% block content %}
   <div class="container py-5">
     <h3>Компьютеры c "{{ item }}"</h3>
-    <a class="btn btn-warning btn-sm"
-      href="{% url 'comps:reports' %}"
-    >
-      Назад
-    </a>
-    <form method="get">
-      {% for key, value in request.GET.items %}
-        {% if key != 'department' %}
-          <input type="hidden" name="{{ key }}" value="{{ value }}">
-        {% endif %}
-      {% endfor %}
-      {{ filter_form.as_p }}
-      <button class="btn btn-primary btn-sm" type="submit">Фильтровать</button>
-    </form>
+    {% include 'includes/filter_department.html' %}
   </div>
   <div class="container-fluid py-3 custom-container">
     {% include 'includes/table_comps.html' %}
