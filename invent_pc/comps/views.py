@@ -1,5 +1,4 @@
 from collections import Counter
-from datetime import timedelta
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -8,47 +7,26 @@ from django.db.models import Count, Q
 from .models import (Comp, Disk, ItemsChoices,
                      Monitor, Ram, Department,
                      Host, VirtualMachine)
-from .forms import DepartmentFilterForm, SearchForm
+from .filters import CompFilter
+from .forms import DepartmentFilterForm
 from .utils import get_pages
 
 
 def index(request):
     """Список всех компьютеров."""
-    item = request.GET.get('filter')
-    comps = Comp.objects.all()
     filter_form = DepartmentFilterForm(request.GET)
-    search_form = SearchForm(request.GET)
+    comps_filter = CompFilter(request.GET, queryset=Comp.objects.all())
 
-    if item == 'disks':
-        comps = Comp.objects.filter(disks__status=ItemsChoices.LOST).distinct()
-    if item == 'rams':
-        comps = Comp.objects.filter(rams__status=ItemsChoices.LOST).distinct()
-    if item == 'monitors':
-        comps = Comp.objects.filter(
-            monitors__status=ItemsChoices.LOST).distinct()
-
-    if filter_form.is_valid() and filter_form.cleaned_data.get('department'):
-        department_id = filter_form.cleaned_data.get('department')
-        comps = comps.filter(department=department_id)
-
-    if search_form.is_valid():
-        if search_form.cleaned_data.get('search_query'):
-            pc_name = search_form.cleaned_data.get('search_query')
-            comps = comps.filter(pc_name__icontains=pc_name)
-        if search_form.cleaned_data.get('older_days'):
-            days = search_form.cleaned_data.get('older_days')
-            comps = Comp.objects.filter(online_date__lte=timezone.now()
-                                        - timedelta(days=days))
-
+    # Не использовать пагинацию для фильтров.
     if request.GET and not request.GET.get('page'):
-        page_obj = get_pages(request, comps, len(comps)+1)
+        page_obj = get_pages(request, comps_filter.qs,
+                             len(comps_filter.qs)+1)
     else:
-        page_obj = get_pages(request, comps)
+        page_obj = get_pages(request, comps_filter.qs)
 
     context = {
         'page_obj': page_obj,
         'filter_form': filter_form,
-        'search_form': search_form
     }
 
     return render(request, 'comps/index.html', context)

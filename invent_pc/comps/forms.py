@@ -13,9 +13,3 @@ class DepartmentFilterForm(forms.Form):
     class Meta:
         model = Department
         fields = ('department',)
-
-
-class SearchForm(forms.Form):
-    search_query = forms.CharField(
-        max_length=100, required=False, label='')
-    older_days = forms.IntegerField(required=False, label='')

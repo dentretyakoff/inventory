@@ -5,7 +5,7 @@
     {% if key != 'department' %}
       <input type="hidden" name="{{ key }}" value="{{ value }}">
       {% endif %}
-    {% endfor %}
+  {% endfor %}
   {{ filter_form.as_p }}
   <button class="btn btn-primary btn-sm" type="submit">Фильтровать</button>
 </form>

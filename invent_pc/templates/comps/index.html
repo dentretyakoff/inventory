@@ -6,17 +6,15 @@
 {% endblock %}
 {% block content %}
   <div class="container-fluid py-3 custom-container">
-      <!-- <div class="container mt-4 justify-content-end"></div> -->
-      <div class="container">
-        <div class="row gy-4">
+    <div class="container">
+      <div class="row gy-4">
         <h1>Список компьютеров: {{ page_obj|length }}</h1>
           <div class="col">
             <form class="text-right" method="get">
               <div class="btn-group" role="group" aria-label="Basic example">
-                <!-- class="btn btn-secondary btn-sm" -->
-                <button type="submit" class="btn btn btn-primary btn-sm" name="filter" value="disks">Диски</button>
-                <button type="submit" class="btn btn btn-primary btn-sm" name="filter" value="rams">ОЗУ</button>
-                <button type="submit" class="btn btn btn-primary btn-sm" name="filter" value="monitors">Мониторы</button>
+                <button type="submit" class="btn btn btn-primary btn-sm" name="disks" value="true">Диски</button>
+                <button type="submit" class="btn btn btn-primary btn-sm" name="rams" value="true">ОЗУ</button>
+                <button type="submit" class="btn btn btn-primary btn-sm" name="monitors" value="true">Мониторы</button>
               </div>
               <p><small>Компьютеры с оборудованием в статусе "Потерян"</small></p>
             </form>
@@ -27,9 +25,9 @@
           <div class="col">
             <form method="get">
               <div class="input-group mb-3">
-                <input 
+                <input
                   type="text" class="form-control" placeholder="Поиск по имени ПК" aria-label="Поиск по имени ПК"
-                  aria-describedby="button-addon2" name="search_query"
+                  aria-describedby="button-addon2" name="pc_name"
                 >
                 <button class="btn btn-primary btn-sm" type="submit" id="button-addon2">Поиск</button>
               </div>
@@ -41,14 +39,13 @@
                 <button class="btn btn-primary btn-sm" type="submit" id="button-addon2">Найти ПК старше</button>
                 <input
                   type="text" class="form-control" placeholder="дней" aria-label="Поиск старых ПК"
-                  aria-describedby="button-addon2" name="older_days"
+                  aria-describedby="button-addon2" name="days"
                 >
-                <!-- <button type="submit" class="btn btn-primary btn-sm" name="filter" value="older_pc">Найти старые ПК</button> -->
               </div>
             </form>
           </div>
       </div>
-  </div>
+    </div>
     {% include 'includes/table_comps.html' %}
     {% include 'comps/includes/paginator.html' %}
   </div>
