@@ -1,0 +1,72 @@
+[
+    {
+        "fio": "Иван Иванов",
+        "login": "user001",
+        "email": "user001@company.local",
+        "group": "Маркетинг",
+        "status": "active"
+    },
+    {
+        "fio": "Анна Смирнова",
+        "login": "user002",
+        "email": "user002@company.local",
+        "group": "Продажи",
+        "status": "active"
+    },
+    {
+        "fio": "Петр Петров",
+        "login": "user003",
+        "email": "user003@company.local",
+        "group": "Разработка",
+        "status": "inactive"
+    },
+    {
+        "fio": "Мария Кузнецова",
+        "login": "user004",
+        "email": "user004@company.local",
+        "group": "Маркетинг",
+        "status": "active"
+    },
+    {
+        "fio": "Дмитрий Соколов",
+        "login": "user005",
+        "email": "user005@company.local",
+        "group": "Продажи",
+        "status": "inactive"
+    },
+    {
+        "fio": "Ольга Попова",
+        "login": "user006",
+        "email": "user006@company.local",
+        "group": "Разработка",
+        "status": "active"
+    },
+    {
+        "fio": "Алексей Воробьев",
+        "login": "user007",
+        "email": "user007@company.local",
+        "group": "Маркетинг",
+        "status": "inactive"
+    },
+    {
+        "fio": "Екатерина Лебедева",
+        "login": "user008",
+        "email": "user008@company.local",
+        "group": "Продажи",
+        "status": "active"
+    },
+    {
+        "fio": "Сергей Морозов",
+        "login": "user009",
+        "email": "user009@company.local",
+        "group": "Разработка",
+        "status": "active"
+    },
+    {
+        "fio": "Юлия Новикова",
+        "login": "user010",
+        "email": "user010@company.local",
+        "group": "Маркетинг",
+        "status": "inactive"
+    }
+]

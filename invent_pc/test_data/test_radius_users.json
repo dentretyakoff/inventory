@@ -1,0 +1,27 @@
+[
+    {
+        "fio": "Иван Иванов",
+        "login": "i.ivanov",
+        "status": "active"
+    },
+    {
+        "fio": "Анна Смирнова",
+        "login": "a.smirnova",
+        "status": "active"
+    },
+    {
+        "fio": "Петр Петров",
+        "login": "p.petrov",
+        "status": "inactive"
+    },
+    {
+        "fio": "Мария Кузнецова",
+        "login": "m.kuznetsova",
+        "status": "active"
+    },
+    {
+        "fio": "Дмитрий Соколов",
+        "login": "d.sokolov",
+        "status": "inactive"
+    }
+]

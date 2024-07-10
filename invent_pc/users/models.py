@@ -6,11 +6,16 @@ class StatusChoices(models.TextChoices):
     INACTIVE = 'inactive', 'Неактивен'
 
 
-class ADusers(models.Model):
-    fio = models.TextField()
-    adlogin = models.TextField()
-    admail = models.TextField(blank=True)
-    adgroup = models.TextField(blank=True)
+class ADUsers(models.Model):
+    fio = models.CharField('ФИО', max_length=200)
+    login = models.CharField('Логин в AD', max_length=100)
+    email = models.EmailField('Email', blank=True, null=True)
+    group = models.CharField(
+        'Группа в AD',
+        max_length=255,
+        blank=True,
+        null=True
+    )
     status = models.CharField(
         max_length=15,
         choices=StatusChoices.choices,
@@ -20,23 +25,27 @@ class ADusers(models.Model):
     rdlogin = models.ForeignKey(
         'Radius',
         on_delete=models.SET_NULL,
+        related_name='ad_user',
         null=True,
-        blank=True
+        blank=True,
+        verbose_name='Учетная запись Radius'
     )
     vpn = models.ForeignKey(
         'VPN',
         on_delete=models.SET_NULL,
+        related_name='ad_user',
         null=True,
-        blank=True
+        blank=True,
+        verbose_name='Учетная запись VPN'
     )
 
     def __str__(self):
-        return f'{self.fio} ({self.adlogin})'
+        return f'{self.fio} ({self.login})'
 
 
 class Radius(models.Model):
-    fio = models.TextField()
-    rdlogin = models.TextField()
+    fio = models.CharField('ФИО', max_length=200)
+    login = models.CharField('Логин в Radius', max_length=100)
     status = models.CharField(
         max_length=15,
         choices=StatusChoices.choices,
@@ -45,12 +54,12 @@ class Radius(models.Model):
     )
 
     def __str__(self):
-        return f'{self.rdlogin}'
+        return f'{self.login}'
 
 
 class VPN(models.Model):
-    name = models.TextField()
-    comment = models.TextField(blank=True)
+    login = models.CharField('Логин VPN', max_length=50)
+    comment = models.TextField('Комментарий', blank=True, null=True)
     status = models.CharField(
         max_length=15,
         choices=StatusChoices.choices,
@@ -59,4 +68,4 @@ class VPN(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.login}'
