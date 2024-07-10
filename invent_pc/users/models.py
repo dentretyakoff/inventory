@@ -42,6 +42,9 @@ class ADUsers(models.Model):
     def __str__(self):
         return f'{self.fio} ({self.login})'
 
+    class Meta:
+        ordering = ('fio',)
+
 
 class Radius(models.Model):
     fio = models.CharField('ФИО', max_length=200)
