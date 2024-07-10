@@ -8,7 +8,7 @@ class StatusChoices(models.TextChoices):
 
 class ADUsers(models.Model):
     fio = models.CharField('ФИО', max_length=200)
-    login = models.CharField('Логин в AD', max_length=100)
+    login = models.CharField('Логин в AD', unique=True, max_length=100)
     email = models.EmailField('Email', blank=True, null=True)
     group = models.CharField(
         'Группа в AD',
@@ -45,7 +45,7 @@ class ADUsers(models.Model):
 
 class Radius(models.Model):
     fio = models.CharField('ФИО', max_length=200)
-    login = models.CharField('Логин в Radius', max_length=100)
+    login = models.CharField('Логин в Radius', unique=True, max_length=100)
     status = models.CharField(
         max_length=15,
         choices=StatusChoices.choices,
@@ -58,7 +58,7 @@ class Radius(models.Model):
 
 
 class VPN(models.Model):
-    login = models.CharField('Логин VPN', max_length=50)
+    login = models.CharField('Логин VPN', unique=True, max_length=50)
     comment = models.TextField('Комментарий', blank=True, null=True)
     status = models.CharField(
         max_length=15,
