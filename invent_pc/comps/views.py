@@ -9,7 +9,7 @@ from .models import (Comp, Disk, ItemsChoices,
                      Host, VirtualMachine)
 from .filters import CompFilter
 from .forms import DepartmentFilterForm
-from .utils import get_pages
+from utils.utils import get_pages
 
 
 def index(request):
