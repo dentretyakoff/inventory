@@ -5,7 +5,6 @@
     <th>ФИО</th>
     <th>Логин</th>
     <th>Email</th>
-    <th>Группа AD</th>
     <th>Статус</th>
     <th>Логин Wi-Fi</th>
     <th>Логин VPN</th>
@@ -15,7 +14,6 @@
       <td>{{ user.fio }}</td>
       <td>{{ user.login }}</td>
       <td>{{ user.email }}</td>
-      <td>{{ user.group }}</td>
       <td>
         {% if user.status == 'active' %}
           <span>&#9989;</span>

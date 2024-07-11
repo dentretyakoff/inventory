@@ -3,70 +3,60 @@
         "fio": "Иванов Иван",
         "login": "user001",
         "email": "user001@company.local",
-        "group": "Маркетинг",
         "status": "active"
     },
     {
         "fio": "Смирнова Анна",
         "login": "user002",
         "email": "user002@company.local",
-        "group": "Продажи",
         "status": "active"
     },
     {
         "fio": "Петров Петр",
         "login": "user003",
         "email": "user003@company.local",
-        "group": "Разработка",
         "status": "inactive"
     },
     {
         "fio": "Кузнецова Мария",
         "login": "user004",
         "email": "user004@company.local",
-        "group": "Маркетинг",
         "status": "active"
     },
     {
         "fio": "Соколов Дмитрий",
         "login": "user005",
         "email": "user005@company.local",
-        "group": "Продажи",
         "status": "inactive"
     },
     {
         "fio": "Попова Ольга",
         "login": "user006",
         "email": "user006@company.local",
-        "group": "Разработка",
         "status": "active"
     },
     {
         "fio": "Воробьев Алексей",
         "login": "user007",
         "email": "user007@company.local",
-        "group": "Маркетинг",
         "status": "inactive"
     },
     {
         "fio": "Лебедева Екатерина",
         "login": "user008",
         "email": "user008@company.local",
-        "group": "Продажи",
         "status": "active"
     },
     {
         "fio": "Морозов Сергей",
         "login": "user009",
         "email": "user009@company.local",
-        "group": "Разработка",
         "status": "active"
     },
     {
         "fio": "Новикова Юлия",
         "login": "user010",
         "email": "user010@company.local",
-        "group": "Маркетинг",
         "status": "inactive"
     }
 ]

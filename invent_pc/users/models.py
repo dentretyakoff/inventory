@@ -10,12 +10,6 @@ class ADUsers(models.Model):
     fio = models.CharField('ФИО', max_length=200)
     login = models.CharField('Логин в AD', unique=True, max_length=100)
     email = models.EmailField('Email', blank=True, null=True)
-    group = models.CharField(
-        'Группа в AD',
-        max_length=255,
-        blank=True,
-        null=True
-    )
     status = models.CharField(
         max_length=15,
         choices=StatusChoices.choices,
