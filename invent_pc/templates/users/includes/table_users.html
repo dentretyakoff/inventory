@@ -19,13 +19,21 @@
           <span>&#9989;</span>
         {% else %}
           <span>&#10060;</span>
-    {% endif %}</td>
+        {% endif %}
+      </td>
       <td class="editable-field">
         <button class="btn btn-sm edit-rdlogin-btn">&#128221;</button>
         <button class="btn btn-sm delete-rdlogin-btn">&#128465;</button>
         <button class="btn btn-sm save-rdlogin-btn" style="display: none;">&#128190;</button>
         <button class="btn btn-sm cancel-rdlogin-btn" style="display: none;">&#10060;</button>
-        <span class="current-value rdlogin-value">{{ user.rdlogin|default_if_none:"-" }}</span>
+        <span class="current-value rdlogin-value">
+          {{ user.rdlogin|default_if_none:"-" }}
+          {% if user.rdlogin.status == 'active' %}
+            <span>&#9989;</span>
+          {% elif user.rdlogin.status == 'inactive'  %}
+            <span>&#10060;</span>
+          {% endif %}
+        </span>
         <select name="rdlogin" class="form-control edit-select" style="display: none;"></select>
       </td>
       <td class="editable-field">
@@ -33,7 +41,14 @@
         <button class="btn btn-sm delete-vpn-btn">&#128465;</button>
         <button class="btn btn-sm save-vpn-btn" style="display: none;">&#128190;</button>
         <button class="btn btn-sm cancel-vpn-btn" style="display: none;">&#10060;</button>
-        <span class="current-value vpn-value">{{ user.vpn|default_if_none:"-" }}</span>
+        <span class="current-value vpn-value">
+          {{ user.vpn|default_if_none:"-" }}
+          {% if user.vpn.status == 'active' %}
+            <span>&#9989;</span>
+          {% elif user.vpn.status == 'inactive'  %}
+            <span>&#10060;</span>
+          {% endif %}
+        </span>
         <select name="vpn" class="form-control edit-select" style="display: none;"></select>
       </td>
     </tr>

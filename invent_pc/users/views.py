@@ -12,7 +12,10 @@ from .filters import UsersFilter
 
 def users_main(request):
     """Список всех учетных записей из AD."""
-    user_filter = UsersFilter(request.GET, queryset=ADUsers.objects.all())
+    user_filter = UsersFilter(
+        request.GET,
+        queryset=ADUsers.objects.all().select_related('rdlogin', 'vpn')
+    )
 
     # Не использовать пагинацию для фильтров.
     if request.GET and not request.GET.get('page'):

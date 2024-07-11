@@ -53,6 +53,9 @@ class Radius(models.Model):
     def __str__(self):
         return f'{self.login}'
 
+    class Meta:
+        ordering = ('login',)
+
 
 class VPN(models.Model):
     login = models.CharField('Логин VPN', unique=True, max_length=50)
@@ -66,3 +69,6 @@ class VPN(models.Model):
 
     def __str__(self):
         return f'{self.login}'
+
+    class Meta:
+        ordering = ('login',)
