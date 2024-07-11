@@ -23,5 +23,80 @@
         "login": "vpn005",
         "comment": "Комментарий для Дмитрия Соколова",
         "status": "inactive"
+    },
+    {
+        "login": "vpn006",
+        "comment": "Комментарий для Ольги Васильевой",
+        "status": "active"
+    },
+    {
+        "login": "vpn007",
+        "comment": "Комментарий для Сергея Семенова",
+        "status": "inactive"
+    },
+    {
+        "login": "vpn008",
+        "comment": "Комментарий для Татьяны Алексеевой",
+        "status": "active"
+    },
+    {
+        "login": "vpn009",
+        "comment": "Комментарий для Николая Воробьева",
+        "status": "inactive"
+    },
+    {
+        "login": "vpn010",
+        "comment": "Комментарий для Екатерины Павловой",
+        "status": "active"
+    },
+    {
+        "login": "vpn011",
+        "comment": "Комментарий для Максима Морозова",
+        "status": "inactive"
+    },
+    {
+        "login": "vpn012",
+        "comment": "Комментарий для Елены Григорьевой",
+        "status": "active"
+    },
+    {
+        "login": "vpn013",
+        "comment": "Комментарий для Михаила Медведева",
+        "status": "inactive"
+    },
+    {
+        "login": "vpn014",
+        "comment": "Комментарий для Аллы Никитиной",
+        "status": "active"
+    },
+    {
+        "login": "vpn015",
+        "comment": "Комментарий для Владимира Сафонова",
+        "status": "inactive"
+    },
+    {
+        "login": "vpn016",
+        "comment": "Комментарий для Валентины Соловьевой",
+        "status": "active"
+    },
+    {
+        "login": "vpn017",
+        "comment": "Комментарий для Андрея Захарова",
+        "status": "inactive"
+    },
+    {
+        "login": "vpn018",
+        "comment": "Комментарий для Лидии Киселевой",
+        "status": "active"
+    },
+    {
+        "login": "vpn019",
+        "comment": "Комментарий для Артема Жукова",
+        "status": "inactive"
+    },
+    {
+        "login": "vpn020",
+        "comment": "Комментарий для Юлии Федоровой",
+        "status": "active"
     }
 ]
