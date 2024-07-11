@@ -1,0 +1,41 @@
+<!-- templates/users/includes/table_users.html -->
+
+<table class="table table-striped table-hover">
+  <tr>
+    <th>ФИО</th>
+    <th>Логин</th>
+    <th>Email</th>
+    <th>Статус</th>
+    <th>Логин Wi-Fi</th>
+    <th>Логин VPN</th>
+  </tr>
+  {% for user in page_obj %}
+    <tr data-user-id="{{ user.id }}">
+      <td>{{ user.fio }}</td>
+      <td>{{ user.login }}</td>
+      <td>{{ user.email }}</td>
+      <td>
+        {% if user.status == 'active' %}
+          <span>&#9989;</span>
+        {% else %}
+          <span>&#10060;</span>
+    {% endif %}</td>
+      <td class="editable-field">
+        <button class="btn btn-sm edit-rdlogin-btn">&#128221;</button>
+        <button class="btn btn-sm delete-rdlogin-btn">&#128465;</button>
+        <button class="btn btn-sm save-rdlogin-btn" style="display: none;">&#128190;</button>
+        <button class="btn btn-sm cancel-rdlogin-btn" style="display: none;">&#10060;</button>
+        <span class="current-value rdlogin-value">{{ user.rdlogin|default_if_none:"-" }}</span>
+        <select name="rdlogin" class="form-control edit-select" style="display: none;"></select>
+      </td>
+      <td class="editable-field">
+        <button class="btn btn-sm edit-vpn-btn">&#128221;</button>
+        <button class="btn btn-sm delete-vpn-btn">&#128465;</button>
+        <button class="btn btn-sm save-vpn-btn" style="display: none;">&#128190;</button>
+        <button class="btn btn-sm cancel-vpn-btn" style="display: none;">&#10060;</button>
+        <span class="current-value vpn-value">{{ user.vpn|default_if_none:"-" }}</span>
+        <select name="vpn" class="form-control edit-select" style="display: none;"></select>
+      </td>
+    </tr>
+  {% endfor %}
+</table>

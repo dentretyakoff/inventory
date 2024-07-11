@@ -1,0 +1,62 @@
+[
+    {
+        "fio": "Иванов Иван",
+        "login": "user002",
+        "email": "user001@company.local",
+        "status": "active"
+    },
+    {
+        "fio": "Смирнова Анна",
+        "login": "user001",
+        "email": "user002@company.local",
+        "status": "active"
+    },
+    {
+        "fio": "Петров Петр",
+        "login": "user003",
+        "email": "user003@company.local",
+        "status": "inactive"
+    },
+    {
+        "fio": "Кузнецова Мария",
+        "login": "user005",
+        "email": "user004@company.local",
+        "status": "active"
+    },
+    {
+        "fio": "Соколов Дмитрий",
+        "login": "user004",
+        "email": "user005@company.local",
+        "status": "inactive"
+    },
+    {
+        "fio": "Попова Ольга",
+        "login": "user006",
+        "email": "user006@company.local",
+        "status": "active"
+    },
+    {
+        "fio": "Воробьев Алексей",
+        "login": "user007",
+        "email": "user007@company.local",
+        "status": "inactive"
+    },
+    {
+        "fio": "Лебедева Екатерина",
+        "login": "user008",
+        "email": "user008@company.local",
+        "status": "active"
+    },
+    {
+        "fio": "Морозов Сергей",
+        "login": "user009",
+        "email": "user009@company.local",
+        "status": "active"
+    },
+    {
+        "fio": "Новикова Юлия",
+        "login": "user010",
+        "email": "user010@company.local",
+        "status": "inactive"
+    }
+]

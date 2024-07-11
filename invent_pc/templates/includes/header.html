@@ -32,6 +32,15 @@
         </li>
       {% endwith %}
       {% with request.resolver_match.view_name as view_name %}
+        <li>
+          <a class="nav-link {% if view_name  == 'users:users_main' %}active{% endif %}"
+            href="{% url 'users:users_main' %}"
+          >
+            Учетные записи
+          </a>
+        </li>
+      {% endwith %}
+      {% with request.resolver_match.view_name as view_name %}
         <li> 
           <a class="nav-link {% if view_name  == 'comps:reports' %}active{% endif %}"
             href="{% url 'comps:reports' %}"

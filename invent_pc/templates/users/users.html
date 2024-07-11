@@ -1,0 +1,28 @@
+<!-- templates/users/users_main.html -->
+
+{% extends 'base.html' %}
+{% block title %}
+  Список учетных записей
+{% endblock %}
+{% block content %}
+  <div class="container-fluid py-3 custom-container">
+    <div class="container">
+      <div class="row gy-4">
+        <h2>Учетных записей: {{ page_obj|length }}</h2>
+          <div class="col-md-4 mx-auto">
+            <form method="get">
+              <div class="input-group mb-3">
+                <input
+                  type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
+                  aria-describedby="button-addon2" name="q"
+                >
+                <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
+              </div>
+            </form>
+          </div>
+      </div>
+    </div>
+    {% include 'users/includes/table_users.html' %}
+    {% include 'includes/paginator.html' %}
+  </div>
+{% endblock %}
