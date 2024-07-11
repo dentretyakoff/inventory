@@ -1,13 +1,13 @@
 [
     {
         "fio": "Иванов Иван",
-        "login": "user001",
+        "login": "user002",
         "email": "user001@company.local",
         "status": "active"
     },
     {
         "fio": "Смирнова Анна",
-        "login": "user002",
+        "login": "user001",
         "email": "user002@company.local",
         "status": "active"
     },
@@ -19,13 +19,13 @@
     },
     {
         "fio": "Кузнецова Мария",
-        "login": "user004",
+        "login": "user005",
         "email": "user004@company.local",
         "status": "active"
     },
     {
         "fio": "Соколов Дмитрий",
-        "login": "user005",
+        "login": "user004",
         "email": "user005@company.local",
         "status": "inactive"
     },
