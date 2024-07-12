@@ -1,0 +1,55 @@
+@keyframes blinking {
+	0% { color: #000; } /* Черный цвет */
+	50% { color: #FF0000; } /* Красный цвет */
+	100% { color: #000; } /* Черный цвет */
+}
+
+.blinking-text {
+	animation: blinking 2s infinite; /* Мигание будет длиться 2 секунды и повторяться бесконечно */
+}
+
+.custom-p {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+/* Стиль для кастомного списка */
+.custom-list {
+list-style: none; /* Убираем маркеры списка */
+padding: 0; /* Убираем отступы */
+}
+
+.custom-list-item {
+display: flex;
+justify-content: space-between;
+padding: 0.5rem 1rem;
+border-bottom: 1px solid #CCC; /* Добавляем разделительные линии */
+}
+
+.custom-list-item:last-child {
+border-bottom: none; /* Убираем разделительную линию для последнего элемента */
+}
+
+.custom-list-item-name {
+flex: 1;
+}
+
+.custom-list-item-value {
+text-align: right;
+}
+
+.status {
+    padding: 5px;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.status.active {
+    background-color: green;
+}
+
+.status.inactive {
+    background-color: red;
+}
+

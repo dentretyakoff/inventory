@@ -120,3 +120,14 @@ COUNT_PAGES_PAGINATOR = 40
 COUNT_MAC = 1
 # Дельта для определения устаревшего олнайна компьютеров, в днях
 DAYS_OFFLINE = 180
+
+# Конфигурация подключения к AD
+AD_STATUS_DISABLED_USER = (514, 66050)
+AD = {
+    'AD_HOST': os.getenv('AD_HOST'),
+    'AD_DOMAIN': os.getenv('AD_DOMAIN'),
+    'AD_USER': os.getenv('AD_USER'),
+    'AD_PASSWORD': os.getenv('AD_PASSWORD'),
+    'AD_SEARCH_BASE': os.getenv('AD_SEARCH_BASE'),
+    'AD_SEARCH_FILTER': os.getenv('AD_SEARCH_FILTER')
+}

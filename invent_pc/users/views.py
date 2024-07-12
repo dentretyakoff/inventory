@@ -1,10 +1,14 @@
 import json
+
+from django.conf import settings
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from ldap3.core.exceptions import LDAPSocketOpenError
 from rest_framework import status
 
-from utils.utils import get_pages
+from exceptions.services import MissingVariableError
+from utils.utils import check_envs, get_pages, read_ad_users
 
 from .models import ADUsers, Radius, VPN
 from .filters import UsersFilter
@@ -66,3 +70,32 @@ def get_vpns(request):
     """Получить список доступных учетных записей VPN."""
     vpns = list(VPN.objects.filter(ad_user=None).values('id', 'login'))
     return JsonResponse(vpns, safe=False)
+
+
+def update_ad_users_data(request):
+    """Обновить данные учетных записей пользователей Active Directory."""
+    try:
+        ad_params = check_envs(settings.AD)
+        ad_users = read_ad_users(ad_params)
+        for ad_user in ad_users:
+            login = ad_user.pop('login')
+            _, _ = ADUsers.objects.update_or_create(
+                login=login,
+                defaults=ad_user
+            )
+    except MissingVariableError as error:
+        return JsonResponse(
+            {'success': False, 'error': error.__str__()},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except LDAPSocketOpenError as error:
+        return JsonResponse(
+            {'success': False, 'error': error.__str__()},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as error:
+        return JsonResponse(
+            {'success': False, 'error': error.__str__()},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    return JsonResponse({'success': True}, status=status.HTTP_200_OK)
