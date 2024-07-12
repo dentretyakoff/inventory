@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 
 from django.conf import settings
 from django.shortcuts import render
@@ -20,6 +21,12 @@ def users_main(request):
         request.GET,
         queryset=ADUsers.objects.all().select_related('rdlogin', 'vpn')
     )
+    ad_users_counts = dict(Counter(
+        status['status'] for status in user_filter.qs.values('status')))
+    radius_users_counts = dict(Counter(
+        status['status'] for status in Radius.objects.values('status')))
+    vpn_users_counts = dict(Counter(
+        status['status'] for status in VPN.objects.values('status')))
 
     # Не использовать пагинацию для фильтров.
     if request.GET and not request.GET.get('page'):
@@ -30,6 +37,9 @@ def users_main(request):
 
     context = {
         'page_obj': page_obj,
+        'ad_users_counts': ad_users_counts,
+        'radius_users_counts': radius_users_counts,
+        'vpn_users_counts': vpn_users_counts
     }
 
     return render(request, 'users/users.html', context)

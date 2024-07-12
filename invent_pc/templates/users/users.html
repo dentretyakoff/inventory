@@ -7,9 +7,37 @@
 {% block content %}
   <div class="container-fluid py-3 custom-container">
     <div class="container">
-      <div class="row gy-4">
-        <h2>Учетных записей: {{ page_obj|length }}</h2>
-          <div class="col-md-4 mx-auto">
+      <div class="row">
+        <div class="col">
+          <table class="table table-bordered table-sm border-secondary">
+            <tr>
+              <th>Сервис</th>
+              <th>Активно &#9989;</th>
+              <th>Неактивно &#10060;</th>
+              <th>Всего</th>
+            </tr>
+            <tr>
+              <td>Active directory</td>
+              <td>{{ ad_users_counts.active }}</td>
+              <td>{{ ad_users_counts.inactive }}</td>
+              <td>{{ ad_users_counts.active|add:ad_users_counts.inactive }}</td>
+            </tr>
+            <tr>
+              <td>Wi-Fi</td>
+              <td>{{ radius_users_counts.active }}</td>
+              <td>{{ radius_users_counts.inactive }}</td>
+              <td>{{ radius_users_counts.active|add:radius_users_counts.inactive }}</td>
+            </tr>
+            <tr>
+              <td>VPN</td>
+              <td>{{ vpn_users_counts.active }}</td>
+              <td>{{ vpn_users_counts.inactive }}</td>
+              <td>{{ vpn_users_counts.active|add:vpn_users_counts.inactive }}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="col">
+          <div class="row">
             <form method="get">
               <div class="input-group mb-3">
                 <input
@@ -19,8 +47,14 @@
                 <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
               </div>
             </form>
-            <button class="btn btn-sm update-users-button">Обновить данные &#128257;</button>
           </div>
+          <div class="col">
+            <button class="btn btn-outline-primary btn-sm update-users-button">Обновить данные &#128257;</button>
+          </div>
+        </div>
+      </div>
+      <div class="row float-end">
+        <span>Записей на странице: <b>{{ page_obj|length }}</b></span>
       </div>
     </div>
     {% include 'users/includes/table_users.html' %}
