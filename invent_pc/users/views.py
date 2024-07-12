@@ -31,18 +31,16 @@ def users_main(request):
     vpn_users_counts = dict(Counter(
         status['status'] for status in VPN.objects.values('status')))
 
-    # Не использовать пагинацию для фильтров.
-    if request.GET and not request.GET.get('page'):
-        page_obj = get_pages(request, user_filter.qs,
-                             len(user_filter.qs)+1)
-    else:
-        page_obj = get_pages(request, user_filter.qs)
+    page_obj = get_pages(request, user_filter.qs)
+    current_query_params = request.GET.copy()
+    current_query_params.pop('page', None)
 
     context = {
         'page_obj': page_obj,
         'ad_users_counts': ad_users_counts,
         'radius_users_counts': radius_users_counts,
-        'vpn_users_counts': vpn_users_counts
+        'vpn_users_counts': vpn_users_counts,
+        'current_query_params': current_query_params,
     }
 
     return render(request, 'users/users.html', context)

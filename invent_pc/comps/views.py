@@ -17,16 +17,14 @@ def index(request):
     filter_form = DepartmentFilterForm(request.GET)
     comps_filter = CompFilter(request.GET, queryset=Comp.objects.all())
 
-    # Не использовать пагинацию для фильтров.
-    if request.GET and not request.GET.get('page'):
-        page_obj = get_pages(request, comps_filter.qs,
-                             len(comps_filter.qs)+1)
-    else:
-        page_obj = get_pages(request, comps_filter.qs)
+    page_obj = get_pages(request, comps_filter.qs)
+    current_query_params = request.GET.copy()
+    current_query_params.pop('page', None)
 
     context = {
         'page_obj': page_obj,
         'filter_form': filter_form,
+        'current_query_params': current_query_params,
     }
 
     return render(request, 'comps/index.html', context)
@@ -122,10 +120,16 @@ def comps_by_item(request, item_type):
         comps = comps.distinct()
     if department_id:
         comps = comps.filter(department=department_id)
-    page_obj = get_pages(request, comps, len(comps)+1)
+
+    page_obj = get_pages(request, comps)
+    current_query_params = request.GET.copy()
+    current_query_params.pop('page', None)
+
     context = {'page_obj': page_obj,
                'filter_form': filter_form,
-               'item': item}
+               'item': item,
+               'current_query_params': current_query_params}
+
     return render(request, 'comps/comps_by_items.html', context)
 
 
