@@ -5,48 +5,50 @@
   Список всех компьютеров
 {% endblock %}
 {% block content %}
-  <div class="container-fluid py-3 custom-container">
-    <div class="container">
-      <div class="row gy-4">
-        <h1>Список компьютеров: {{ page_obj|length }}</h1>
-          <div class="col">
-            <form class="text-right" method="get">
-              <div class="btn-group" role="group" aria-label="Basic example">
-                <button type="submit" class="btn btn btn-primary btn-sm" name="disks" value="true">Диски</button>
-                <button type="submit" class="btn btn btn-primary btn-sm" name="rams" value="true">ОЗУ</button>
-                <button type="submit" class="btn btn btn-primary btn-sm" name="monitors" value="true">Мониторы</button>
-              </div>
-              <p><small>Компьютеры с оборудованием в статусе "Потерян"</small></p>
-            </form>
+  <div class="container">
+    <div class="text-center"><h4>Компьютеры</h4></div>
+    <div class="row">
+      <div class="col">
+        <form class="text-right" method="get">
+          <div class="btn-group" role="group" aria-label="Basic example">
+            <button type="submit" class="btn btn btn-primary btn-sm" name="disks" value="true">Диски</button>
+            <button type="submit" class="btn btn btn-primary btn-sm" name="rams" value="true">ОЗУ</button>
+            <button type="submit" class="btn btn btn-primary btn-sm" name="monitors" value="true">Мониторы</button>
           </div>
-          <div class="col">
-            {% include 'includes/filter_department.html' %}
+          <p><small>Компьютеры с оборудованием в статусе "Потерян"</small></p>
+        </form>
+      </div>
+      <div class="col">
+        {% include 'includes/filter_department.html' %}
+      </div>
+      <div class="col">
+        <form method="get">
+          <div class="input-group mb-3">
+            <input
+              type="text" class="form-control" placeholder="Поиск по имени ПК" aria-label="Поиск по имени ПК"
+              aria-describedby="button-addon2" name="pc_name"
+            >
+            <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
           </div>
-          <div class="col">
-            <form method="get">
-              <div class="input-group mb-3">
-                <input
-                  type="text" class="form-control" placeholder="Поиск по имени ПК" aria-label="Поиск по имени ПК"
-                  aria-describedby="button-addon2" name="pc_name"
-                >
-                <button class="btn btn-primary btn-sm" type="submit" id="button-addon2">Поиск</button>
-              </div>
-            </form>
-          </div>
-          <div class="col">
-            <form method="get">
-              <div class="input-group mb-3">
-                <button class="btn btn-primary btn-sm" type="submit" id="button-addon2">Найти ПК старше</button>
-                <input
-                  type="text" class="form-control" placeholder="дней" aria-label="Поиск старых ПК"
-                  aria-describedby="button-addon2" name="days"
-                >
-              </div>
-            </form>
-          </div>
+        </form>
+      </div>
+      <div class="col">
+          <form method="get">
+            <div class="input-group mb-3">
+              <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">Найти ПК старше</button>
+              <input
+                type="text" class="form-control" placeholder="дней" aria-label="Поиск старых ПК"
+                aria-describedby="button-addon2" name="days"
+              >
+            </div>
+          </form>
       </div>
     </div>
-    {% include 'comps/includes/table_comps.html' %}
-    {% include 'includes/paginator.html' %}
+    <div class="row text-end">
+      <span>Всего: <b>{{ comps_count }}</b></span>
+      <span>Записей на странице: <b>{{ page_obj|length }}</b></span>
+    </div>
   </div>
+  {% include 'comps/includes/table_comps.html' %}
+  {% include 'includes/paginator.html' %}
 {% endblock %}

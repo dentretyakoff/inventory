@@ -5,25 +5,40 @@
   Виртуальные машины
 {% endblock %}
 {% block content %}
-  <div class="container py-5">
-    <h1>Виртуальные машины: {{ vms_count }}</h1>
-    <div class="col-md-10 p-5">
-      <table class="table table-striped table-bordered table-sm">
-        <thead>
-          <tr>
-            <th>Хост</th>
-            <th>Виртуальная машина</th>
-            <th>Адаптеры</th>
-            <th>Время работы</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for host in hosts %}
-            {% if host.vms_count != 0 %}
-              <tr class="border-bottom border-2">
-                <td rowspan="{{ host.vms_count }}">{{ host.name }} ({{ host.vms_count }})</td>
-                {% for vm in host.vms.all %}
-                  {% if forloop.first %}
+  <div class="container">
+    <div class="text-center"><h4>Виртуальные машины: {{ vms_count }}</h4></div>
+    <table class="table table-striped table-bordered table-sm">
+      <thead>
+        <tr>
+          <th>Хост</th>
+          <th>Виртуальная машина</th>
+          <th>Адаптеры</th>
+          <th>Время работы</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for host in hosts %}
+          {% if host.vms_count != 0 %}
+            <tr class="border-bottom border-2">
+              <td rowspan="{{ host.vms_count }}">{{ host.name }} ({{ host.vms_count }})</td>
+              {% for vm in host.vms.all %}
+                {% if forloop.first %}
+                  <td
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="{{ host.name }}"
+                  >{{ vm.name }}</td>
+                  <td>
+                    {% for adapter in vm.adapter.all %}
+                      <p
+                        class="small custom-p {% if adapter.is_duplicate %} blinking-text {% endif %}"
+                      >MAC {{ adapter.mac }}</p>
+                      <p class="small custom-p">VLAN {{ adapter.vlan }}</p>
+                    {% endfor %}
+                  </td>
+                  <td>{{ vm.uptime }}</td>
+                {% else %}
+                  <tr>
                     <td
                       data-toggle="tooltip"
                       data-placement="top"
@@ -38,30 +53,13 @@
                       {% endfor %}
                     </td>
                     <td>{{ vm.uptime }}</td>
-                  {% else %}
-                    <tr>
-                      <td
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        title="{{ host.name }}"
-                      >{{ vm.name }}</td>
-                      <td>
-                        {% for adapter in vm.adapter.all %}
-                          <p
-                            class="small custom-p {% if adapter.is_duplicate %} blinking-text {% endif %}"
-                          >MAC {{ adapter.mac }}</p>
-                          <p class="small custom-p">VLAN {{ adapter.vlan }}</p>
-                        {% endfor %}
-                      </td>
-                      <td>{{ vm.uptime }}</td>
-                    </tr>
-                  {% endif %}
-                {% endfor %}
-              </tr>
-            {% endif %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+                  </tr>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 {% endblock %}

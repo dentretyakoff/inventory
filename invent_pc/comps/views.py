@@ -25,6 +25,7 @@ def index(request):
         'page_obj': page_obj,
         'filter_form': filter_form,
         'current_query_params': current_query_params,
+        'comps_count': comps_filter.qs.count(),
     }
 
     return render(request, 'comps/index.html', context)
@@ -93,11 +94,14 @@ def reports(request):
         item['model'] for item in disks.values('model')))
     context = {
         'comps_count': comps.count(),
-        'count_by_motherboard': count_by_motherboard,
+        'count_by_motherboard': sorted(count_by_motherboard.items(),
+                                       key=lambda item: item[1], reverse=True),
         'count_by_win_ver': count_by_win_ver,
         'count_by_os_arch': count_by_os_arch,
-        'count_by_cpu': count_by_cpu,
-        'count_by_disks': count_by_disks,
+        'count_by_cpu': sorted(count_by_cpu.items(),
+                               key=lambda item: item[1], reverse=True),
+        'count_by_disks': sorted(count_by_disks.items(),
+                                 key=lambda item: item[1], reverse=True),
         'filter_form': filter_form,
     }
     return render(request, 'comps/reports.html', context)

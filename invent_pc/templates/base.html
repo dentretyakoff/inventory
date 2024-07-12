@@ -27,9 +27,11 @@
       {% include 'includes/header.html' %}
     </header>
     <main>
-      {% block content %}
-        Контент не подвезли
-      {% endblock %}
+      <div class="container-fluid py-3 custom-container">
+        {% block content %}
+          Контент не подвезли
+        {% endblock %}
+      </div>
     </main>
     <footer class="border-top text-center py-3">
         {% include 'includes/footer.html' %}

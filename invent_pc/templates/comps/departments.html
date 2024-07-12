@@ -5,24 +5,30 @@
   Департаменты
 {% endblock %}
 {% block content %}
-  <div class="container py-5">
-    <h1>Департаменты</h1>
-      <div class="col-md-5 p-6">
-        <ul class="list-group">
-          {% for department in departments %}
-              <li class="custom-list-item">
-                <span class="custom-list-item-name">{{ department }}:</span>
-                {% if not department.comp.count %}
-                <a class="btn btn-danger btn-sm" 
-                  href="{% url 'comps:department_delete' department.id %}"
-                >
-                  -
-                </a>
-                {% endif %}
-                <span class="custom-list-item-value">&nbsp;{{ department.comp.count }}</span>
-              </li>
-          {% endfor %}
-        </ul>
-    </div>
+  <div class="container">
+    <div class="text-center"><h4>Департаменты</h4></div>
+    <table class="table table-striped table-bordered table-sm">
+      <tr>
+        <th>Название</th>
+        <th>Количество</th>
+      </tr>
+      {% for department in departments %}
+        <tr>
+          <td>
+            {{ department }}
+            {% if not department.comp.count %}
+              <a class="btn btn-outline-danger btn-sm float-end" 
+                href="{% url 'comps:department_delete' department.id %}"
+              >
+                &#10060;
+              </a>
+            {% endif %}
+          </td>
+          <td>
+            {{ department.comp.count }}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
   </div>
 {% endblock %}

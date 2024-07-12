@@ -5,62 +5,61 @@
   Список учетных записей
 {% endblock %}
 {% block content %}
-  <div class="container-fluid py-3 custom-container">
-    <div class="container">
-      <div class="row">
-        <div class="col">
-          <table class="table table-bordered table-sm border-secondary">
-            <tr>
-              <th>Сервис</th>
-              <th>Активно &#9989;</th>
-              <th>Неактивно &#10060;</th>
-              <th>Всего</th>
-            </tr>
-            <tr>
-              <td>Active Directory</td>
-              <td>{{ ad_users_counts.active }}</td>
-              <td>{{ ad_users_counts.inactive }}</td>
-              <td>{{ ad_users_counts.active|add:ad_users_counts.inactive }}</td>
-            </tr>
-            <tr>
-              <td>Wi-Fi</td>
-              <td>{{ radius_users_counts.active }}</td>
-              <td>{{ radius_users_counts.inactive }}</td>
-              <td>{{ radius_users_counts.active|add:radius_users_counts.inactive }}</td>
-            </tr>
-            <tr>
-              <td>VPN</td>
-              <td>{{ vpn_users_counts.active }}</td>
-              <td>{{ vpn_users_counts.inactive }}</td>
-              <td>{{ vpn_users_counts.active|add:vpn_users_counts.inactive }}</td>
-            </tr>
-          </table>
-        </div>
-        <div class="col">
-          <div class="row">
-            <form method="get">
-              <div class="input-group mb-3">
-                <input
-                  type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
-                  aria-describedby="button-addon2" name="q"
-                >
-                <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
-              </div>
-            </form>
-          </div>
-          <div class="col">
-            <button class="btn btn-outline-primary btn-sm update-users-button">Обновить данные &#128257;</button>
-          </div>
-          <div id="loading-indicator" style="display: none;">Обновление данных...</div>
-          <div id="success-message" style="display: none; color: green;"></div>
-          <div id="error-message" style="display: none; color: red;"></div>
-        </div>
+  <div class="container">
+    <div class="text-center"><h4>Учетные записи</h4></div>
+    <div class="row">
+      <div class="col">
+        <table class="table table-bordered table-sm border-secondary">
+          <tr>
+            <th>Сервис</th>
+            <th>Активно &#9989;</th>
+            <th>Неактивно &#10060;</th>
+            <th>Всего</th>
+          </tr>
+          <tr>
+            <td>Active Directory</td>
+            <td>{{ ad_users_counts.active }}</td>
+            <td>{{ ad_users_counts.inactive }}</td>
+            <td>{{ ad_users_counts.active|add:ad_users_counts.inactive }}</td>
+          </tr>
+          <tr>
+            <td>Wi-Fi</td>
+            <td>{{ radius_users_counts.active }}</td>
+            <td>{{ radius_users_counts.inactive }}</td>
+            <td>{{ radius_users_counts.active|add:radius_users_counts.inactive }}</td>
+          </tr>
+          <tr>
+            <td>VPN</td>
+            <td>{{ vpn_users_counts.active }}</td>
+            <td>{{ vpn_users_counts.inactive }}</td>
+            <td>{{ vpn_users_counts.active|add:vpn_users_counts.inactive }}</td>
+          </tr>
+        </table>
       </div>
-      <div class="row float-end">
-        <span>Записей на странице: <b>{{ page_obj|length }}</b></span>
+      <div class="col">
+        <div class="row">
+          <form method="get">
+            <div class="input-group mb-3">
+              <input
+                type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
+                aria-describedby="button-addon2" name="q"
+              >
+              <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
+            </div>
+          </form>
+        </div>
+        <div class="col">
+          <button class="btn btn-outline-primary btn-sm update-users-button">Обновить данные &#128257;</button>
+        </div>
+        <div id="loading-indicator" style="display: none;">Обновление данных...</div>
+        <div id="success-message" style="display: none; color: green;"></div>
+        <div id="error-message" style="display: none; color: red;"></div>
       </div>
     </div>
-    {% include 'users/includes/table_users.html' %}
-    {% include 'includes/paginator.html' %}
+    <div class="row float-end">
+      <span>Записей на странице: <b>{{ page_obj|length }}</b></span>
+    </div>
   </div>
+  {% include 'users/includes/table_users.html' %}
+  {% include 'includes/paginator.html' %}
 {% endblock %}
