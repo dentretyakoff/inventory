@@ -17,7 +17,7 @@
               <th>Всего</th>
             </tr>
             <tr>
-              <td>Active directory</td>
+              <td>Active Directory</td>
               <td>{{ ad_users_counts.active }}</td>
               <td>{{ ad_users_counts.inactive }}</td>
               <td>{{ ad_users_counts.active|add:ad_users_counts.inactive }}</td>
@@ -51,6 +51,9 @@
           <div class="col">
             <button class="btn btn-outline-primary btn-sm update-users-button">Обновить данные &#128257;</button>
           </div>
+          <div id="loading-indicator" style="display: none;">Обновление данных...</div>
+          <div id="success-message" style="display: none; color: green;"></div>
+          <div id="error-message" style="display: none; color: red;"></div>
         </div>
       </div>
       <div class="row float-end">

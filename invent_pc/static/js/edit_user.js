@@ -1,9 +1,40 @@
 $(document).ready(function() {
     $('.update-users-button').on('click', function() {
+        var button = $(this);
+        button.prop('disabled', true); // Блокируем кнопку
+    
+        $('#loading-indicator').show();
+    
         $.ajax({
             url: '/users/update-users-data/',
             method: 'GET',
-        })
+            dataType: 'json',
+            success: function(response, textStatus, xhr) {
+                $('#loading-indicator').hide();
+                button.prop('disabled', false); // Разблокируем кнопку
+
+                $('#success-message').text('Данные успешно обновлены!').show();
+                $('#error-message').hide();
+            },
+            error: function(xhr) {
+                $('#loading-indicator').hide();
+                button.prop('disabled', false); // Разблокируем кнопку
+    
+                // Проверяем, был ли ответ JSON и содержит ли он ошибку
+                try {
+                    var jsonResponse = JSON.parse(xhr.responseText);
+                    if (jsonResponse.error) {
+                        $('#error-message').text('Ошибка: ' + jsonResponse.error + ' (Статус код: ' + xhr.status + ')').show();
+                    } else {
+                        $('#error-message').text('Неизвестная ошибка. (Статус код: ' + xhr.status + ')').show();
+                    }
+                } catch (e) {
+                    $('#error-message').text('Произошла ошибка при запросе. (Статус код: ' + xhr.status + ')').show();
+                }
+    
+                $('#success-message').hide();
+            }
+        });
     });
 
     $('.edit-rdlogin-btn').click(function() {
