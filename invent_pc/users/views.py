@@ -20,16 +20,42 @@ logger = logging.getLogger(__name__)
 
 def users_main(request):
     """Список всех учетных записей из AD."""
-    user_filter = UsersFilter(
-        request.GET,
-        queryset=ADUsers.objects.all().select_related('rdlogin', 'vpn')
+    ad_users = ADUsers.objects.all().select_related('rdlogin', 'vpn')
+    related_statuses = ad_users.values('rdlogin__status', 'vpn__status')
+    unrelated_radius_statuses = (Radius.objects
+                                 .filter(ad_user__isnull=True)
+                                 .values('status'))
+    unrelated_vpn_statuses = (VPN.objects
+                              .filter(ad_user__isnull=True)
+                              .values('status'))
+
+    ad_users_statuses = dict(Counter(
+        status['status'] for status in ad_users.values('status'))
     )
-    ad_users_counts = dict(Counter(
-        status['status'] for status in user_filter.qs.values('status')))
-    radius_users_counts = dict(Counter(
-        status['status'] for status in Radius.objects.values('status')))
-    vpn_users_counts = dict(Counter(
-        status['status'] for status in VPN.objects.values('status')))
+    radius_users_statuses = dict(Counter(
+        status['rdlogin__status']
+        for status in related_statuses if status['rdlogin__status'])
+    )
+    vpn_users_statuses = dict(Counter(
+        status['vpn__status']
+        for status in related_statuses if status['vpn__status'])
+    )
+    unrelated_radius_users_statuses = dict(Counter(
+        status['status'] for status in unrelated_radius_statuses)
+    )
+    unrelated_vpn_users_statuses = dict(Counter(
+        status['status'] for status in unrelated_vpn_statuses)
+    )
+
+    ad_users_statuses['total'] = (sum(ad_users_statuses.values()))
+    radius_users_statuses['total'] = (sum(radius_users_statuses.values()))
+    vpn_users_statuses['total'] = (sum(vpn_users_statuses.values()))
+    unrelated_radius_users_statuses['total'] = (sum(
+        unrelated_radius_users_statuses.values()))
+    unrelated_vpn_users_statuses['total'] = (sum(
+        unrelated_vpn_users_statuses.values()))
+
+    user_filter = UsersFilter(request.GET, queryset=ad_users)
 
     page_obj = get_pages(request, user_filter.qs)
     current_query_params = request.GET.copy()
@@ -37,9 +63,11 @@ def users_main(request):
 
     context = {
         'page_obj': page_obj,
-        'ad_users_counts': ad_users_counts,
-        'radius_users_counts': radius_users_counts,
-        'vpn_users_counts': vpn_users_counts,
+        'ad_users_statuses': ad_users_statuses,
+        'radius_users_statuses': radius_users_statuses,
+        'vpn_users_statuses': vpn_users_statuses,
+        'unrelated_radius_users_statuses': unrelated_radius_users_statuses,
+        'unrelated_vpn_users_statuses': unrelated_vpn_users_statuses,
         'current_query_params': current_query_params,
     }
 

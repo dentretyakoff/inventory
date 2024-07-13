@@ -5,9 +5,20 @@
     <th>ФИО</th>
     <th>Логин</th>
     <th>Email</th>
-    <th>Статус</th>
-    <th>Логин Wi-Fi</th>
-    <th>Логин VPN</th>
+    <form action="{% url 'users:users_main' %}" method="get">
+      <th>Статус
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="active">&#9989;</button>
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="inactive">&#10060;</button>
+      </th>
+      <th>Логин Wi-Fi
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="rdlogin" value="active">&#9989;</button>
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="rdlogin" value="inactive">&#10060;</button>
+      </th>
+      <th>Логин VPN
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="vpn" value="active">&#9989;</button>
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="vpn" value="inactive">&#10060;</button>
+      </th>
+    </form>
   </tr>
   {% for user in page_obj %}
     <tr data-user-id="{{ user.id }}">

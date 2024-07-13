@@ -8,6 +8,9 @@ class UsersFilter(django_filters.FilterSet):
         method='filter_all_fields',
         label='Поиск по всем полям'
     )
+    status = django_filters.CharFilter(field_name='status')
+    rdlogin = django_filters.CharFilter(field_name='rdlogin__status')
+    vpn = django_filters.CharFilter(field_name='vpn__status')
 
     def filter_all_fields(self, queryset, name, value):
         if value:
