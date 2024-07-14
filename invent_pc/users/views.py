@@ -3,17 +3,17 @@ import logging
 from collections import Counter
 
 from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
 from rest_framework import status
+from utils.utils import (check_envs, get_pages, read_ad_users,
+                         read_radius_users, read_vpn_users)
 
-from exceptions.services import MissingVariableError
-from utils.utils import check_envs, get_pages, read_ad_users
-
-from .models import ADUsers, Radius, VPN
 from .filters import UsersFilter
-
+from .models import VPN, ADUsers, Radius
+from .utils import update_or_create_users
 
 logger = logging.getLogger(__name__)
 
@@ -111,18 +111,29 @@ def get_vpns(request):
     return JsonResponse(vpns, safe=False)
 
 
-def update_ad_users_data(request):
-    """Обновить данные учетных записей пользователей Active Directory."""
+def update_users_data(request):
+    """Обновляет учетные данные из внешних систем.
+    - Active Directory
+    - WiFi Radius
+    - VPN Mikrotik
+    """
     try:
+        # Проверяем необходимые перменные окружения
         ad_params = check_envs(settings.AD)
+        vpn_params = check_envs(settings.VPN)
+        radius_params = check_envs(settings.RADIUS)
+
+        # Получем данные из систем
         ad_users = read_ad_users(ad_params)
-        for ad_user in ad_users:
-            login = ad_user.pop('login')
-            _, _ = ADUsers.objects.update_or_create(
-                login=login,
-                defaults=ad_user
-            )
-    except MissingVariableError as error:
+        vpn_users = read_vpn_users(vpn_params)
+        radius_users = read_radius_users(radius_params)
+
+        # Обновляем пользователей в БД
+        update_or_create_users(ADUsers, ad_users)
+        update_or_create_users(VPN, vpn_users)
+        update_or_create_users(Radius, radius_users)
+
+    except (MissingVariableError, RadiusUsersNotFoundError) as error:
         logger.error(str(error))
         return JsonResponse(
             {'success': False, 'error': str(error)},

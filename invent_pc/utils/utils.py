@@ -1,8 +1,11 @@
+import json
+import routeros_api
+import winrm
 from django.conf import settings
 from django.core.paginator import Paginator
 from ldap3 import Server, Connection, SUBTREE
 
-from exceptions.services import MissingVariableError
+from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
 
 COUNT_PAGES = settings.COUNT_PAGES_PAGINATOR
 AD_STATUS_DISABLED_USER = settings.AD_STATUS_DISABLED_USER
@@ -54,3 +57,69 @@ def read_ad_users(ad_params: dict) -> list[dict[str]]:
             )
 
     return ad_users
+
+
+def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
+    """Читает учетные записи vpn из Mikrotik."""
+    router_ip = vpn_params.get('VPN_HOST')
+    username = vpn_params.get('VPN_USER')
+    password = vpn_params.get('VPN_PASSWORD')
+
+    connection = routeros_api.RouterOsApiPool(
+        host=router_ip,
+        username=username,
+        password=password,
+        plaintext_login=True
+    )
+    api = connection.get_api()
+    ppp_secrets = api.get_resource('/ppp/secret')
+    secrets = ppp_secrets.get()
+    vpn_users = []
+
+    for secret in secrets:
+        user_status = 'active'
+        if secret['disabled'] == 'true':
+            user_status = 'inactive'
+        vpn_users.append(
+            {
+                'login': secret.get('name'),
+                'comment': secret.get('comment'),
+                'status': user_status
+            }
+        )
+    connection.disconnect()
+
+    return vpn_users
+
+
+def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
+    """Читает учетные записи с сервера Radius."""
+    radius_host = radius_params.get('RADIUS_HOST')
+    radius_group = radius_params.get('RADIUS_GROUP')
+    radius_user = radius_params.get('RADIUS_USER')
+    radius_password = radius_params.get('RADIUS_PASSWORD')
+
+    session = winrm.Session(radius_host, auth=(radius_user, radius_password))
+    result = session.run_ps(
+        f"Get-WmiObject Win32_UserAccount | Where-Object {{ $_.SID -in (Get-LocalGroupMember '{radius_group}').SID.Value }} | Select-Object Name, Fullname, Disabled | ConvertTo-Json"  # noqa
+    )
+    result = result.std_out.decode('utf-8')
+    radius_users = []
+
+    if not result:
+        raise RadiusUsersNotFoundError(
+            f'Не найдены пользователи в группе {radius_group}')
+
+    for user in json.loads(result):
+        user_status = 'active'
+        if user['Disabled']:
+            user_status = 'inactive'
+        radius_users.append(
+            {
+                'fio': user.get('Fullname'),
+                'login': user.get('Name'),
+                'status': user_status
+            }
+        )
+
+    return radius_users

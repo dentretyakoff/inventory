@@ -3,6 +3,7 @@ djangorestframework==3.12.4
 requests==2.26.0
 python-dotenv==1.0.0
 psycopg2-binary==2.9.3
-python-dotenv==1.0.0
 django-filter==2.4.0
 ldap3==2.9.1
+RouterOS-api==0.18.1
+pywinrm==0.4.3

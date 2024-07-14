@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 
 from dotenv import load_dotenv, find_dotenv
@@ -131,3 +132,24 @@ AD = {
     'AD_SEARCH_BASE': os.getenv('AD_SEARCH_BASE'),
     'AD_SEARCH_FILTER': os.getenv('AD_SEARCH_FILTER')
 }
+
+# Конфигурация подключения к Mikrotik
+VPN = {
+    'VPN_HOST': os.getenv('VPN_HOST'),
+    'VPN_USER': os.getenv('VPN_USER'),
+    'VPN_PASSWORD': os.getenv('VPN_PASSWORD')
+}
+
+# Конфигурация подключения к RADIUS
+RADIUS = {
+    'RADIUS_HOST': os.getenv('RADIUS_HOST'),
+    'RADIUS_GROUP': os.getenv('RADIUS_GROUP'),
+    'RADIUS_USER': os.getenv('RADIUS_USER'),
+    'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD')
+}
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - [%(levelname)s] - %(name)s - '
+           '%(filename)s.%(funcName)s(%(lineno)d) - %(message)s'
+)
