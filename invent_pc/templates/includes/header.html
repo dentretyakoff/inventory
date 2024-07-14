@@ -14,6 +14,15 @@
     </a>
     <ul class="nav nav-pills">
       {% with request.resolver_match.view_name as view_name %}
+        <li>
+          <a class="nav-link {% if view_name  == 'comps:index' %}active{% endif %}"
+            href="{% url 'comps:index' %}"
+          >
+            Главная
+          </a>
+        </li>
+      {% endwith %}
+      {% with request.resolver_match.view_name as view_name %}
         <li> 
           <a class="nav-link {% if view_name  == 'comps:departments' %}active{% endif %}"
             href="{% url 'comps:departments' %}"

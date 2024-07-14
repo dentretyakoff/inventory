@@ -1,4 +1,5 @@
 import os
+import logging
 from pathlib import Path
 
 from dotenv import load_dotenv, find_dotenv
@@ -115,8 +116,40 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 API_VERSION = 'v1'
 
 # Количество компьютеров на странице пагинатора
-COUNT_PAGES_PAGINATOR = 40
+COUNT_PAGES_PAGINATOR = 20
 # Константа для определения уникальности мак-адреса
 COUNT_MAC = 1
 # Дельта для определения устаревшего олнайна компьютеров, в днях
 DAYS_OFFLINE = 180
+
+# Конфигурация подключения к AD
+AD_STATUS_DISABLED_USER = (514, 66050)
+AD = {
+    'AD_HOST': os.getenv('AD_HOST'),
+    'AD_DOMAIN': os.getenv('AD_DOMAIN'),
+    'AD_USER': os.getenv('AD_USER'),
+    'AD_PASSWORD': os.getenv('AD_PASSWORD'),
+    'AD_SEARCH_BASE': os.getenv('AD_SEARCH_BASE'),
+    'AD_SEARCH_FILTER': os.getenv('AD_SEARCH_FILTER')
+}
+
+# Конфигурация подключения к Mikrotik
+VPN = {
+    'VPN_HOST': os.getenv('VPN_HOST'),
+    'VPN_USER': os.getenv('VPN_USER'),
+    'VPN_PASSWORD': os.getenv('VPN_PASSWORD')
+}
+
+# Конфигурация подключения к RADIUS
+RADIUS = {
+    'RADIUS_HOST': os.getenv('RADIUS_HOST'),
+    'RADIUS_GROUP': os.getenv('RADIUS_GROUP'),
+    'RADIUS_USER': os.getenv('RADIUS_USER'),
+    'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD')
+}
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - [%(levelname)s] - %(name)s - '
+           '%(filename)s.%(funcName)s(%(lineno)d) - %(message)s'
+)

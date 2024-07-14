@@ -5,24 +5,89 @@
   Список учетных записей
 {% endblock %}
 {% block content %}
-  <div class="container-fluid py-3 custom-container">
-    <div class="container">
-      <div class="row gy-4">
-        <h2>Учетных записей: {{ page_obj|length }}</h2>
-          <div class="col-md-4 mx-auto">
-            <form method="get">
-              <div class="input-group mb-3">
-                <input
-                  type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
-                  aria-describedby="button-addon2" name="q"
-                >
-                <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
-              </div>
-            </form>
-          </div>
+  <div class="container">
+    <div class="text-center"><h4>Учетные записи</h4></div>
+    <div class="row">
+      <div class="col">
+        <table class="table table-striped table-bordered table-sm border-secondary">
+          <thead>
+            <tr style="text-align: center">
+              <th>Сервис</th>
+              <th colspan="2">Активна &#9989;</th>
+              <th colspan="2">Неактивна &#10060;</th>
+              <th colspan="2">Всего</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="text-align: center">
+              <td style="text-align: left">Active Directory</td>
+              <td colspan="2" class="{% if request.GET.status == 'active' %}bold-text{% endif %}">
+                  {{ ad_users_statuses.active }}
+              </td>
+              <td colspan="2" class="{% if request.GET.status == 'inactive' %}bold-text{% endif %}">
+                {{ ad_users_statuses.inactive }}
+              </td>
+              <td colspan="2">{{ ad_users_statuses.total }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td colspan="6" style="font-size: 12px;">
+                * Количество привязанных / не привязанных к учетной записи AD
+              </td>
+            </tr>
+            <tr style="text-align: center">
+              <td style="text-align: left">Wi-Fi</td>
+              <td class="{% if request.GET.rdlogin == 'active' %}bold-text{% endif %}">
+                {{ radius_users_statuses.active }}
+              </td>
+              <td>{{ unrelated_radius_users_statuses.active }}</td>
+              <td class="{% if request.GET.rdlogin == 'inactive' %}bold-text{% endif %}">
+                {{ radius_users_statuses.inactive }}
+              </td>
+              <td>{{ unrelated_radius_users_statuses.inactive }}</td>
+              <td>{{ radius_users_statuses.total }}</td>
+              <td>{{ unrelated_radius_users_statuses.total }}</td>
+            </tr>
+            <tr style="text-align: center">
+              <td style="text-align: left">VPN</td>
+              <td class="{% if request.GET.vpn == 'active' %}bold-text{% endif %}">
+                {{ vpn_users_statuses.active }}
+              </td>
+              <td>{{ unrelated_vpn_users_statuses.active }}</td>
+              <td class="{% if request.GET.vpn == 'inactive' %}bold-text{% endif %}">
+                {{ vpn_users_statuses.inactive }}
+              </td>
+              <td>{{ unrelated_vpn_users_statuses.inactive }}</td>
+              <td>{{ vpn_users_statuses.total }}</td>
+              <td>{{ unrelated_vpn_users_statuses.total }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col">
+        <div class="row">
+          <form method="get">
+            <div class="input-group mb-3">
+              <input
+                type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
+                aria-describedby="button-addon2" name="q"
+              >
+              <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
+            </div>
+          </form>
+        </div>
+        <div class="col">
+          <button class="btn btn-outline-primary btn-sm update-users-button">Обновить данные &#128257;</button>
+        </div>
+        <div id="loading-indicator" style="display: none;">Обновление данных... &#8987;</div>
+        <div id="success-message" style="display: none; color: green;"></div>
+        <div id="error-message" style="display: none; color: red;"></div>
       </div>
     </div>
-    {% include 'users/includes/table_users.html' %}
-    {% include 'includes/paginator.html' %}
+    <div class="row float-end">
+      <span>Записей на странице: <b>{{ page_obj|length }}</b></span>
+    </div>
   </div>
+  {% include 'users/includes/table_users.html' %}
+  {% include 'includes/paginator.html' %}
 {% endblock %}

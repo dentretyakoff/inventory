@@ -17,16 +17,15 @@ def index(request):
     filter_form = DepartmentFilterForm(request.GET)
     comps_filter = CompFilter(request.GET, queryset=Comp.objects.all())
 
-    # Не использовать пагинацию для фильтров.
-    if request.GET and not request.GET.get('page'):
-        page_obj = get_pages(request, comps_filter.qs,
-                             len(comps_filter.qs)+1)
-    else:
-        page_obj = get_pages(request, comps_filter.qs)
+    page_obj = get_pages(request, comps_filter.qs)
+    current_query_params = request.GET.copy()
+    current_query_params.pop('page', None)
 
     context = {
         'page_obj': page_obj,
         'filter_form': filter_form,
+        'current_query_params': current_query_params,
+        'comps_count': comps_filter.qs.count(),
     }
 
     return render(request, 'comps/index.html', context)
@@ -95,11 +94,14 @@ def reports(request):
         item['model'] for item in disks.values('model')))
     context = {
         'comps_count': comps.count(),
-        'count_by_motherboard': count_by_motherboard,
+        'count_by_motherboard': sorted(count_by_motherboard.items(),
+                                       key=lambda item: item[1], reverse=True),
         'count_by_win_ver': count_by_win_ver,
         'count_by_os_arch': count_by_os_arch,
-        'count_by_cpu': count_by_cpu,
-        'count_by_disks': count_by_disks,
+        'count_by_cpu': sorted(count_by_cpu.items(),
+                               key=lambda item: item[1], reverse=True),
+        'count_by_disks': sorted(count_by_disks.items(),
+                                 key=lambda item: item[1], reverse=True),
         'filter_form': filter_form,
     }
     return render(request, 'comps/reports.html', context)
@@ -122,10 +124,16 @@ def comps_by_item(request, item_type):
         comps = comps.distinct()
     if department_id:
         comps = comps.filter(department=department_id)
-    page_obj = get_pages(request, comps, len(comps)+1)
+
+    page_obj = get_pages(request, comps)
+    current_query_params = request.GET.copy()
+    current_query_params.pop('page', None)
+
     context = {'page_obj': page_obj,
                'filter_form': filter_form,
-               'item': item}
+               'item': item,
+               'current_query_params': current_query_params}
+
     return render(request, 'comps/comps_by_items.html', context)
 
 
