@@ -1,5 +1,3 @@
-from collections import Counter
-
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Count, Q
@@ -9,7 +7,7 @@ from .models import (Comp, Disk, ItemsChoices,
                      Host, VirtualMachine)
 from .filters import CompFilter
 from .forms import DepartmentFilterForm
-from utils.utils import get_pages
+from utils.utils import get_pages, get_counters, sorted_list
 
 
 def index(request):
@@ -32,7 +30,7 @@ def index(request):
 
 
 def comp_detail(request, pc_name):
-    "Детальная информация о компьютере."
+    """Детальная информация о компьютере."""
     comp = get_object_or_404(Comp, pc_name=pc_name)
     context = {
         'comp': comp,
@@ -41,14 +39,14 @@ def comp_detail(request, pc_name):
 
 
 def comp_delete(request, pc_name):
-    "Удалить компьютер."
+    """Удалить компьютер."""
     comp = get_object_or_404(Comp, pc_name=pc_name)
     comp.delete()
     return redirect('comps:index')
 
 
 def item_edit(request, pc_name, item, item_status, item_id):
-    "Подтверждение установки/снятие диска на компьютере."
+    """Подтверждение установки/снятие диска на компьютере."""
     models = {
         'disk': Disk,
         'ram': Ram,
@@ -82,26 +80,20 @@ def reports(request):
     else:
         comps = Comp.objects.all()
         disks = Disk.objects.filter(status=ItemsChoices.INSTALLED)
-    count_by_motherboard = dict(Counter(
-        item['motherboard'] for item in comps.values('motherboard')))
-    count_by_win_ver = dict(Counter(
-        item['win_ver'] for item in comps.values('win_ver')))
-    count_by_os_arch = dict(Counter(
-        item['os_arch'] for item in comps.values('os_arch')))
-    count_by_cpu = dict(Counter(
-        item['cpu'] for item in comps.values('cpu')))
-    count_by_disks = dict(Counter(
-        item['model'] for item in disks.values('model')))
+    count_by_motherboard = get_counters(
+        comps.values('motherboard'), 'motherboard')
+    count_by_win_ver = get_counters(comps.values('win_ver'), 'win_ver')
+    count_by_os_arch = get_counters(comps.values('os_arch'), 'os_arch')
+    count_by_cpu = get_counters(comps.values('cpu'), 'cpu')
+    count_by_disks = get_counters(disks.values('model'), 'model')
+
     context = {
         'comps_count': comps.count(),
-        'count_by_motherboard': sorted(count_by_motherboard.items(),
-                                       key=lambda item: item[1], reverse=True),
-        'count_by_win_ver': count_by_win_ver,
-        'count_by_os_arch': count_by_os_arch,
-        'count_by_cpu': sorted(count_by_cpu.items(),
-                               key=lambda item: item[1], reverse=True),
-        'count_by_disks': sorted(count_by_disks.items(),
-                                 key=lambda item: item[1], reverse=True),
+        'count_by_motherboard': sorted_list(count_by_motherboard),
+        'count_by_win_ver': sorted_list(count_by_win_ver),
+        'count_by_os_arch': sorted_list(count_by_os_arch),
+        'count_by_cpu': sorted_list(count_by_cpu),
+        'count_by_disks': sorted_list(count_by_disks),
         'filter_form': filter_form,
     }
     return render(request, 'comps/reports.html', context)
