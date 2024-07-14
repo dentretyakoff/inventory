@@ -52,4 +52,7 @@ text-align: right;
 .status.inactive {
     background-color: red;
 }
+.bold-text {
+    font-weight: bold;
+}
 

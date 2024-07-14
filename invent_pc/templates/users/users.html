@@ -21,8 +21,12 @@
           <tbody>
             <tr style="text-align: center">
               <td style="text-align: left">Active Directory</td>
-              <td colspan="2">{{ ad_users_statuses.active }}</td>
-              <td colspan="2">{{ ad_users_statuses.inactive }}</td>
+              <td colspan="2" class="{% if request.GET.status == 'active' %}bold-text{% endif %}">
+                  {{ ad_users_statuses.active }}
+              </td>
+              <td colspan="2" class="{% if request.GET.status == 'inactive' %}bold-text{% endif %}">
+                {{ ad_users_statuses.inactive }}
+              </td>
               <td colspan="2">{{ ad_users_statuses.total }}</td>
             </tr>
             <tr>
@@ -33,18 +37,26 @@
             </tr>
             <tr style="text-align: center">
               <td style="text-align: left">Wi-Fi</td>
-              <td>{{ radius_users_statuses.active }}</td>
+              <td class="{% if request.GET.rdlogin == 'active' %}bold-text{% endif %}">
+                {{ radius_users_statuses.active }}
+              </td>
               <td>{{ unrelated_radius_users_statuses.active }}</td>
-              <td>{{ radius_users_statuses.inactive }}</td>
+              <td class="{% if request.GET.rdlogin == 'inactive' %}bold-text{% endif %}">
+                {{ radius_users_statuses.inactive }}
+              </td>
               <td>{{ unrelated_radius_users_statuses.inactive }}</td>
               <td>{{ radius_users_statuses.total }}</td>
               <td>{{ unrelated_radius_users_statuses.total }}</td>
             </tr>
             <tr style="text-align: center">
               <td style="text-align: left">VPN</td>
-              <td>{{ vpn_users_statuses.active }}</td>
+              <td class="{% if request.GET.vpn == 'active' %}bold-text{% endif %}">
+                {{ vpn_users_statuses.active }}
+              </td>
               <td>{{ unrelated_vpn_users_statuses.active }}</td>
-              <td>{{ vpn_users_statuses.inactive }}</td>
+              <td class="{% if request.GET.vpn == 'inactive' %}bold-text{% endif %}">
+                {{ vpn_users_statuses.inactive }}
+              </td>
               <td>{{ unrelated_vpn_users_statuses.inactive }}</td>
               <td>{{ vpn_users_statuses.total }}</td>
               <td>{{ unrelated_vpn_users_statuses.total }}</td>
