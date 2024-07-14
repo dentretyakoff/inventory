@@ -1,6 +1,5 @@
 import json
 import logging
-from collections import Counter
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -11,6 +10,7 @@ from rest_framework import status
 from utils.utils import (check_envs, get_pages, read_ad_users,
                          read_radius_users, read_vpn_users)
 
+from utils.utils import get_counters
 from .filters import UsersFilter
 from .models import VPN, ADUsers, Radius
 from .utils import update_or_create_users
@@ -29,31 +29,14 @@ def users_main(request):
                               .filter(ad_user__isnull=True)
                               .values('status'))
 
-    ad_users_statuses = dict(Counter(
-        status['status'] for status in ad_users.values('status'))
-    )
-    radius_users_statuses = dict(Counter(
-        status['rdlogin__status']
-        for status in related_statuses if status['rdlogin__status'])
-    )
-    vpn_users_statuses = dict(Counter(
-        status['vpn__status']
-        for status in related_statuses if status['vpn__status'])
-    )
-    unrelated_radius_users_statuses = dict(Counter(
-        status['status'] for status in unrelated_radius_statuses)
-    )
-    unrelated_vpn_users_statuses = dict(Counter(
-        status['status'] for status in unrelated_vpn_statuses)
-    )
+    ad_users_statuses = get_counters(ad_users.values('status'), 'status')
+    radius_users_statuses = get_counters(related_statuses, 'rdlogin__status')
+    vpn_users_statuses = get_counters(related_statuses, 'vpn__status')
 
-    ad_users_statuses['total'] = (sum(ad_users_statuses.values()))
-    radius_users_statuses['total'] = (sum(radius_users_statuses.values()))
-    vpn_users_statuses['total'] = (sum(vpn_users_statuses.values()))
-    unrelated_radius_users_statuses['total'] = (sum(
-        unrelated_radius_users_statuses.values()))
-    unrelated_vpn_users_statuses['total'] = (sum(
-        unrelated_vpn_users_statuses.values()))
+    unrelated_radius_users_statuses = get_counters(
+        unrelated_radius_statuses, 'status')
+    unrelated_vpn_users_statuses = get_counters(
+        unrelated_vpn_statuses, 'status')
 
     user_filter = UsersFilter(request.GET, queryset=ad_users)
 

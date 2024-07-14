@@ -18,31 +18,35 @@
             <td>Всего</td>
             <td>{{ comps_count }}</td>
           </tr>
-          {% for item, count in count_by_os_arch.items %}
-          <tr>
-            <td>
-              {% with request.GET.department as department %}
-                <a
-                  href="{% url 'comps:comps_by_item' item_type='os_arch' %}?item={{ item }}&department={{ department }}"
-                >{{ item }}</a>
-              {% endwith %}
-            </td>
-            <td>{{ count }}</td>
-          </tr>
+          {% for item, count in count_by_os_arch %}
+            {% if not item == 'total' %}
+              <tr>
+                <td>
+                  {% with request.GET.department as department %}
+                    <a
+                      href="{% url 'comps:comps_by_item' item_type='os_arch' %}?item={{ item }}&department={{ department }}"
+                    >{{ item }}</a>
+                  {% endwith %}
+                </td>
+                <td>{{ count }}</td>
+              </tr>
+            {% endif %}
           {% endfor %}
-          {% for item, count in count_by_win_ver.items %}
-          <tr>
-            <td>
-              {% with request.GET.department as department %}
-                <a
-                  href="{% url 'comps:comps_by_item' item_type='win_ver' %}?item={{ item }}&department={{ department }}"
-                >{{ item }}</a>
-              {% endwith %}
-            </td>
-            <td>
-              {{ count }}
-            </td>
-          </tr>
+          {% for item, count in count_by_win_ver %}
+            {% if not item == 'total' %}
+              <tr>
+                <td>
+                  {% with request.GET.department as department %}
+                    <a
+                      href="{% url 'comps:comps_by_item' item_type='win_ver' %}?item={{ item }}&department={{ department }}"
+                    >{{ item }}</a>
+                  {% endwith %}
+                </td>
+                <td>
+                  {{ count }}
+                </td>
+              </tr>
+            {% endif %}
           {% endfor %}
         </table>
       </div>
@@ -61,11 +65,15 @@
         {% for item, count in count_by_motherboard %}
         <tr>
           <td>
-            {% with request.GET.department as department %}
-              <a
-                href="{% url 'comps:comps_by_item' item_type='motherboard' %}?item={{ item }}&department={{ department }}"
-              >{{ item }}</a>
-            {% endwith %}
+            {% if item == 'total' %}
+              <b>Всего</b>
+            {% else %}
+              {% with request.GET.department as department %}
+                <a
+                  href="{% url 'comps:comps_by_item' item_type='motherboard' %}?item={{ item }}&department={{ department }}"
+                >{{ item }}</a>
+              {% endwith %}
+            {% endif %}
           </td>
           <td>{{ count }}</td>
         </tr>
@@ -81,11 +89,15 @@
         {% for item, count in count_by_cpu %}
         <tr>
           <td>
-            {% with request.GET.department as department %}
-              <a
-                href="{% url 'comps:comps_by_item' item_type='cpu' %}?item={{ item }}&department={{ department }}"
-              >{{ item }}</a>
-            {% endwith %}
+            {% if item == 'total' %}
+              <b>Всего</b>
+            {% else %}
+              {% with request.GET.department as department %}
+                <a
+                  href="{% url 'comps:comps_by_item' item_type='cpu' %}?item={{ item }}&department={{ department }}"
+                >{{ item }}</a>
+              {% endwith %}
+            {% endif %}
           </td>
           <td>{{ count }}</td>
         </tr>
@@ -101,11 +113,15 @@
         {% for item, count in count_by_disks %}
         <tr>
           <td>
-            {% with request.GET.department as department %}
-              <a
-                href="{% url 'comps:comps_by_item' item_type='disk' %}?item={{ item }}&department={{ department }}"
-              >{{ item }}</a>
-            {% endwith %}
+            {% if item == 'total' %}
+              <b>Всего</b>
+            {% else %}
+              {% with request.GET.department as department %}
+                <a
+                  href="{% url 'comps:comps_by_item' item_type='disk' %}?item={{ item }}&department={{ department }}"
+                >{{ item }}</a>
+              {% endwith %}
+            {% endif %}
           </td>
           <td>{{ count }}</td>
         </tr>
