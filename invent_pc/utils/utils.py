@@ -1,14 +1,14 @@
 import json
-import routeros_api
-import winrm
 from collections import Counter
 
+import winrm
 from django.db.models import QuerySet
 from django.conf import settings
 from django.core.paginator import Paginator
 from ldap3 import Server, Connection, SUBTREE
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
+from .fix_router_os import routeros_api_fix
 
 COUNT_PAGES = settings.COUNT_PAGES_PAGINATOR
 AD_STATUS_DISABLED_USER = settings.AD_STATUS_DISABLED_USER
@@ -68,7 +68,7 @@ def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
     username = vpn_params.get('VPN_USER')
     password = vpn_params.get('VPN_PASSWORD')
 
-    connection = routeros_api.RouterOsApiPool(
+    connection = routeros_api_fix.RouterOsApiPool(
         host=router_ip,
         username=username,
         password=password,
@@ -98,20 +98,17 @@ def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
 def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
     """Читает учетные записи с сервера Radius."""
     radius_host = radius_params.get('RADIUS_HOST')
-    radius_group = radius_params.get('RADIUS_GROUP')
     radius_user = radius_params.get('RADIUS_USER')
     radius_password = radius_params.get('RADIUS_PASSWORD')
+    radius_script = radius_params.get('RADIUS_SCRIPT')
 
     session = winrm.Session(radius_host, auth=(radius_user, radius_password))
-    result = session.run_ps(
-        f"Get-WmiObject Win32_UserAccount | Where-Object {{ $_.SID -in (Get-LocalGroupMember '{radius_group}').SID.Value }} | Select-Object Name, Fullname, Disabled | ConvertTo-Json"  # noqa
-    )
+    result = session.run_ps(radius_script)
     result = result.std_out.decode('utf-8')
     radius_users = []
 
     if not result:
-        raise RadiusUsersNotFoundError(
-            f'Не найдены пользователи в группе {radius_group}')
+        raise RadiusUsersNotFoundError('Не найдены пользователи в группе')
 
     for user in json.loads(result):
         user_status = 'active'
@@ -119,7 +116,7 @@ def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
             user_status = 'inactive'
         radius_users.append(
             {
-                'fio': user.get('Fullname'),
+                'fio': user.get('FullName'),
                 'login': user.get('Name'),
                 'status': user_status
             }
