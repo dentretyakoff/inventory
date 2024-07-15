@@ -143,7 +143,7 @@ VPN = {
 # Конфигурация подключения к RADIUS
 RADIUS = {
     'RADIUS_HOST': os.getenv('RADIUS_HOST'),
-    'RADIUS_GROUP': os.getenv('RADIUS_GROUP'),
+    'RADIUS_SCRIPT': os.getenv('RADIUS_SCRIPT'),
     'RADIUS_USER': os.getenv('RADIUS_USER'),
     'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD')
 }
