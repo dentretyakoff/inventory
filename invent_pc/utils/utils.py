@@ -75,8 +75,11 @@ def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
         plaintext_login=True
     )
     api = connection.get_api()
-    ppp_secrets = api.get_resource('/ppp/secret')
-    secrets = ppp_secrets.get()
+    ppp_secrets = api.get_resource('/ppp/secret/')
+    secrets = ppp_secrets.call(
+        'print',
+        {'proplist': 'name,comment,disabled'}
+    )
     vpn_users = []
 
     for secret in secrets:
