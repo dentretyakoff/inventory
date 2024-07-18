@@ -13,7 +13,7 @@ from utils.utils import (check_envs, get_pages, read_ad_users,
 from utils.utils import get_counters
 from .filters import UsersFilter
 from .models import VPN, ADUsers, Radius
-from .utils import update_or_create_users
+from .utils import update_or_create_users, match_vpn_users, match_radius_users
 
 logger = logging.getLogger(__name__)
 
@@ -115,6 +115,8 @@ def update_users_data(request):
         update_or_create_users(ADUsers, ad_users)
         update_or_create_users(VPN, vpn_users)
         update_or_create_users(Radius, radius_users)
+        match_vpn_users()
+        match_radius_users()
 
     except (MissingVariableError, RadiusUsersNotFoundError) as error:
         logger.error(str(error))

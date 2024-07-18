@@ -1,7 +1,6 @@
 import json
 from collections import Counter
 
-import winrm
 from django.db.models import QuerySet
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -9,6 +8,7 @@ from ldap3 import Server, Connection, SUBTREE
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
 from .fix_router_os import routeros_api_fix
+from .fix_pywinrm import CustomSession
 
 COUNT_PAGES = settings.COUNT_PAGES_PAGINATOR
 AD_STATUS_DISABLED_USER = settings.AD_STATUS_DISABLED_USER
@@ -40,21 +40,31 @@ def read_ad_users(ad_params: dict) -> list[dict[str]]:
     base_dn = ad_params.get('AD_SEARCH_BASE')
     seatch_filter = ad_params.get('AD_SEARCH_FILTER')
     attrs = ('cn', 'sAMAccountName', 'wWWHomePage', 'userAccountControl')
+    page_size = 1000
     ad_users = []
 
     with Connection(server, user=username, password=password) as conn:
         conn.bind()
-        conn.search(base_dn, seatch_filter, SUBTREE, attributes=attrs)
-        for user in conn.entries:
-            if user.userAccountControl.value in AD_STATUS_DISABLED_USER:
+        users = conn.extend.standard.paged_search(
+            base_dn,
+            seatch_filter,
+            SUBTREE,
+            get_operational_attributes=True,
+            attributes=attrs,
+            paged_size=page_size,
+            generator=True
+        )
+        for user in users:
+            user_attrs = user['attributes']
+            if user_attrs['userAccountControl'] in AD_STATUS_DISABLED_USER:
                 user_status = 'inactive'
             else:
                 user_status = 'active'
             ad_users.append(
                 {
-                    'fio': user.cn.value,
-                    'login': user.sAMAccountName.value,
-                    'email': user.wWWHomePage.value,
+                    'fio': user_attrs.get('cn'),
+                    'login': user_attrs.get('sAMAccountName'),
+                    'email': user_attrs.get('wWWHomePage,'),
                     'status': user_status
                 }
             )
@@ -105,9 +115,9 @@ def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
     radius_password = radius_params.get('RADIUS_PASSWORD')
     radius_script = radius_params.get('RADIUS_SCRIPT')
 
-    session = winrm.Session(radius_host, auth=(radius_user, radius_password))
+    session = CustomSession(radius_host, auth=(radius_user, radius_password))
     result = session.run_ps(radius_script)
-    result = result.std_out.decode('utf-8')
+    result = result.std_out.decode()
     radius_users = []
 
     if not result:
