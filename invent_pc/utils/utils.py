@@ -64,7 +64,7 @@ def read_ad_users(ad_params: dict) -> list[dict[str]]:
                 {
                     'fio': user_attrs.get('cn'),
                     'login': user_attrs.get('sAMAccountName'),
-                    'email': user_attrs.get('wWWHomePage,'),
+                    'email': user_attrs.get('wWWHomePage'),
                     'status': user_status
                 }
             )
