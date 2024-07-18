@@ -24,7 +24,7 @@
     <tr data-user-id="{{ user.id }}">
       <td>{{ user.fio }}</td>
       <td>{{ user.login }}</td>
-      <td>{{ user.email }}</td>
+      <td>{% if user.email %}{{ user.email }}{% endif %}</td>
       <td>
         {% if user.status == 'active' %}
           <span>&#9989;</span>
