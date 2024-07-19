@@ -78,6 +78,7 @@
         </div>
         <div class="col">
           <button class="btn btn-outline-primary btn-sm update-users-button">Обновить данные &#128257;</button>
+          <a href="{% url 'users:generate_users_report' %}" class="btn btn-outline-primary btn-sm">Скачать Excel &#128190;</a>
         </div>
         <div id="loading-indicator" style="display: none;">Обновление данных... &#8987;</div>
         <div id="success-message" style="display: none; color: green;"></div>
