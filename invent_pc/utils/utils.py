@@ -56,15 +56,17 @@ def read_ad_users(ad_params: dict) -> list[dict[str]]:
         )
         for user in users:
             user_attrs = user['attributes']
-            if user_attrs['userAccountControl'] in AD_STATUS_DISABLED_USER:
-                user_status = 'inactive'
-            else:
+            email = None
+            user_status = 'inactive'
+            if user_attrs['userAccountControl'] not in AD_STATUS_DISABLED_USER:
                 user_status = 'active'
+            if user_attrs.get('wWWHomePage'):
+                email = user_attrs.get('wWWHomePage')
             ad_users.append(
                 {
                     'fio': user_attrs.get('cn'),
                     'login': user_attrs.get('sAMAccountName'),
-                    'email': user_attrs.get('wWWHomePage'),
+                    'email': email,
                     'status': user_status
                 }
             )

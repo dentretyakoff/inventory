@@ -1,3 +1,4 @@
+import openpyxl
 from django.db.models import Model
 
 from .models import ADUsers, Radius, VPN, StatusChoices
@@ -77,3 +78,42 @@ def match_radius_users() -> None:
                 updated_users.append(no_radius_user)
 
     ADUsers.objects.bulk_update(updated_users, ('rdlogin',))
+
+
+def get_file(users: ADUsers) -> openpyxl.Workbook:
+    """Создает Excel со связными учетными записями."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Список учетных записей'
+
+    headers = ['№', 'ФИО', 'Логин', 'Email',
+               'Wi-Fi', 'VPN логин', 'VPN комментарий']
+    ws.append(headers)
+
+    for num, user in enumerate(users, 1):
+        ws.append([
+            num,
+            user.fio,
+            user.login,
+            user.email,
+            getattr(user.rdlogin, 'login', '-'),
+            getattr(user.vpn, 'login', '-'),
+            getattr(user.vpn, 'comment', '-')
+        ])
+
+        statuses = {
+            # ws.cell(row= , column=)
+            ws.cell(num+1, 3): getattr(user, 'status', None),
+            ws.cell(num+1, 5): getattr(user.rdlogin, 'status', None),
+            ws.cell(num+1, 6): getattr(user.vpn, 'status', None)
+        }
+        for cell, status in statuses.items():
+            if status == StatusChoices.INACTIVE:
+                cell.fill = openpyxl.styles.PatternFill(
+                    'solid', fgColor='FF0000')  # Красный
+
+    for cell in ws['1:1']:
+        cell.font = openpyxl.styles.Font(bold=True)
+        cell.fill = openpyxl.styles.PatternFill('solid', fgColor='00C0C0C0')
+
+    return wb

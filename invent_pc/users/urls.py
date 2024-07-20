@@ -12,5 +12,8 @@ urlpatterns = [
     path('update-users-data/',
          views.update_users_data,
          name='update_users_data'),
+    path('generate-users-report/',
+         views.generate_users_report,
+         name='generate_users_report'),
     path('', views.users_main, name='users_main'),
 ]

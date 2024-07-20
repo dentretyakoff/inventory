@@ -2,18 +2,23 @@ import json
 import logging
 
 from django.conf import settings
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
+from django.http import HttpResponse
 from rest_framework import status
-from utils.utils import (check_envs, get_pages, read_ad_users,
-                         read_radius_users, read_vpn_users)
 
-from utils.utils import get_counters
+from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
+from utils.utils import (check_envs, get_pages, read_ad_users,
+                         read_radius_users, read_vpn_users, get_counters)
+
 from .filters import UsersFilter
 from .models import VPN, ADUsers, Radius
-from .utils import update_or_create_users, match_vpn_users, match_radius_users
+from .utils import (update_or_create_users,
+                    match_vpn_users,
+                    match_radius_users,
+                    get_file)
 
 logger = logging.getLogger(__name__)
 
@@ -131,3 +136,19 @@ def update_users_data(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     return JsonResponse({'success': True}, status=status.HTTP_200_OK)
+
+
+def generate_users_report(request):
+    """Формирует список связных учетных записей, отдает файлом Excel."""
+    users = ADUsers.objects.all().filter(
+        Q(rdlogin__isnull=False) | Q(vpn__isnull=False)
+        ).select_related('rdlogin', 'vpn')
+
+    excel_file = get_file(users)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  # noqa
+    response['Content-Disposition'] = 'attachment; filename="users_report.xlsx"'  # noqa
+
+    excel_file.save(response)
+
+    return response
