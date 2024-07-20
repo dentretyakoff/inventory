@@ -112,13 +112,15 @@ def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
 
 def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
     """Читает учетные записи с сервера Radius."""
-    radius_host = radius_params.get('RADIUS_HOST')
-    radius_user = radius_params.get('RADIUS_USER')
-    radius_password = radius_params.get('RADIUS_PASSWORD')
-    radius_script = radius_params.get('RADIUS_SCRIPT')
-
-    session = CustomSession(radius_host, auth=(radius_user, radius_password))
-    result = session.run_ps(radius_script)
+    params = {
+        'transport': 'ntlm',
+        'target': radius_params.get('RADIUS_HOST'),
+        'server_cert_validation': radius_params.get('RADIUS_SERVER_CERT_VALIDATION'),  # noqa
+        'auth': (radius_params.get('RADIUS_USER'),
+                 radius_params.get('RADIUS_PASSWORD'))
+    }
+    session = CustomSession(**params)
+    result = session.run_ps(radius_params.get('RADIUS_SCRIPT'))
     result = result.std_out.decode()
     radius_users = []
 

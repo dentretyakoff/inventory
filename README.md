@@ -73,13 +73,21 @@ server {
 Приложение доступно по адресу http://localhost/
 
 ### Настройка WinRM <a id="winrm"></a>
-На сервере откуда планируется получать пользователей Radius создайте пользователй `inventory` с правми администратора и в PowerShell выполните следующие команды:
+На сервере откуда планируется получать учетные записи Radius создайте пользователя `inventory` с правми администратора и в PowerShell выполните следующие команды:
 ```
 Enable-PSRemoting -Force
-winrm set winrm/config/service '@{AllowUnencrypted="true"}'
-winrm set winrm/config/service/auth '@{Basic="true"}'
-Set-Item WSMan:\localhost\Client\TrustedHosts -Value <укажите IP сервера>
+winrm set winrm/config/service/auth '@{Negotiate="true"}'
 ```
+Если используете HTTPS соединение, загрузите ваш сертификат в `Cert:\LocalMachine\My` и привяжите его отпечаток к Listener
+```
+# Получает отпечаток сертификата
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object { $_.Subject -like "*inventory.yourdomen.com*" }
+# Удаляет все Listener(опционально)
+Get-ChildItem wsman:\localhost\Listener\ | Where-Object -Property Keys -like 'Transport=HTTP*' | Remove-Item -Recurse
+# Создает Listener и привязывает к нему ваш сертификат
+New-Item -Path WSMan:\localhost\Listener\ -Transport HTTPS -Address * -CertificateThumbPrint $cert.Thumbprint -Force
+```
+
 
 ### Настройка RouterOS <a id="router-os"></a>
 На сервере с RouterOS или Mikrotik создайте пользователя с правами на чтение.
@@ -88,7 +96,7 @@ Set-Item WSMan:\localhost\Client\TrustedHosts -Value <укажите IP серв
 ```
 Включите api в Mikrotik
 ```
-/user add name=readuser group=read password=yourpasswor
+/ip service set numbers="api" disabled="no"
 ```
 
 ### Опрос клиентов <a id="win-computers"></a>

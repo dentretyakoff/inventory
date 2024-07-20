@@ -1,3 +1,4 @@
+# flake8: noqa
 import os
 import logging
 from pathlib import Path
@@ -145,7 +146,8 @@ RADIUS = {
     'RADIUS_HOST': os.getenv('RADIUS_HOST'),
     'RADIUS_SCRIPT': os.getenv('RADIUS_SCRIPT'),
     'RADIUS_USER': os.getenv('RADIUS_USER'),
-    'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD')
+    'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD'),
+    'RADIUS_SERVER_CERT_VALIDATION': os.getenv('RADIUS_SERVER_CERT_VALIDATION')
 }
 
 logging.basicConfig(
