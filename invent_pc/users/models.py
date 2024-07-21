@@ -79,20 +79,17 @@ class ADUsers(BaseUserMixin, models.Model):
         return (self.cached_status == StatusChoices.ACTIVE
                 and self.status == StatusChoices.INACTIVE)
 
-    def get_logins(self):
-        """Возвращает логины связных учетных записей."""
-        return (getattr(self.rdlogin, 'login', None),
-                getattr(self.vpn, 'login', None))
-
     def save(self, *args: Any, **kwargs: Any) -> None:
-        """Добавляет логины VPN и Radius в списки на удаление
+        """Добавляет пользователей VPN и Radius в списки на блокировку
         если учетная запись AD была заблокирована."""
         if self.is_blocked:
-            radius_login, vpn_login = self.get_logins()
-            if radius_login:
-                Radius.add_user_to_block(radius_login)
-            if vpn_login:
-                VPN.add_user_to_block(vpn_login)
+            radius_user, vpn_user = self.rdlogin, self.vpn
+            if radius_user:
+                radius_user.status = StatusChoices.INACTIVE
+                Radius.add_user_to_block(radius_user)
+            if vpn_user:
+                vpn_user.status = StatusChoices.INACTIVE
+                VPN.add_user_to_block(vpn_user)
         return super().save(*args, **kwargs)
 
     class Meta:

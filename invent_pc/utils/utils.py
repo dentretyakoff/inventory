@@ -8,8 +8,8 @@ from django.core.paginator import Paginator
 from ldap3 import Server, Connection, SUBTREE
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
-from users.models import Radius, VPN
-from .fix_router_os import routeros_api_fix
+from users.models import Radius, VPN, StatusChoices
+from .fix_router_os import routeros_api_fix, ConnectionWrapper
 from .fix_pywinrm import CustomSession
 
 COUNT_PAGES = settings.COUNT_PAGES_PAGINATOR
@@ -78,7 +78,7 @@ def read_ad_users(ad_params: dict) -> list[dict[str]]:
 
 
 def get_vpn_connection(
-        vpn_params: dict[str, str]) -> routeros_api_fix.RouterOsApiPool:
+        vpn_params: dict[str, str]) -> ConnectionWrapper:
     """Создает подключение к Mikrotik."""
     params = {
         'host': vpn_params.get('VPN_HOST'),
@@ -89,33 +89,33 @@ def get_vpn_connection(
         'ssl_verify_hostname': vpn_params.get('VPN_SSL_VERIFY_HOSTNAME'),
         'plaintext_login': True,
     }
+    connection = routeros_api_fix.RouterOsApiPool(**params)
 
-    return routeros_api_fix.RouterOsApiPool(**params)
+    return ConnectionWrapper(connection)
 
 
 def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
     """Читает учетные записи vpn из Mikrotik."""
-    connection = get_vpn_connection(vpn_params)
-    api = connection.get_api()
-    ppp_secrets = api.get_resource('/ppp/secret/')
-    secrets = ppp_secrets.call(
-        'print',
-        {'proplist': 'name,comment,disabled'}
-    )
-    vpn_users = []
-
-    for secret in secrets:
-        user_status = 'active'
-        if secret['disabled'] == 'true':
-            user_status = 'inactive'
-        vpn_users.append(
-            {
-                'login': secret.get('name'),
-                'comment': secret.get('comment'),
-                'status': user_status
-            }
+    with get_vpn_connection(vpn_params) as connection:
+        api = connection.get_api()
+        ppp_secrets = api.get_resource('/ppp/secret/')
+        secrets = ppp_secrets.call(
+            'print',
+            {'proplist': 'name,comment,disabled'}
         )
-    connection.disconnect()
+        vpn_users = []
+
+        for secret in secrets:
+            user_status = 'active'
+            if secret['disabled'] == 'true':
+                user_status = 'inactive'
+            vpn_users.append(
+                {
+                    'login': secret.get('name'),
+                    'comment': secret.get('comment'),
+                    'status': user_status
+                }
+            )
 
     return vpn_users
 
@@ -124,23 +124,22 @@ def block_vpn_users(vpn_params: dict[str]) -> None:
     """Блокирует учетные записи VPN в mikrotik."""
     users = VPN.get_users_to_block()
     need_disable = vpn_params.get('VPN_NEED_DISABLE_USERS')
-    connection = get_vpn_connection(vpn_params)
-    try:
-        if users and need_disable:
-            api = connection.get_api()
-            ppp_secrets = api.get_resource('/ppp/secret/')
-            for user in users:
-                secret = ppp_secrets.get(name=user)
-                if secret:
-                    ppp_secrets.set(id=secret[0].get('id'), disabled='yes')
-                    logger.info(f'Пользователь VPN {user} отключен.')
-                else:
-                    logger.info(f'Пользователь VPN {user} не найден.')
-    except Exception as e:
-        logger.error(f'Ошибка отключения пользователей VPN: {e}')
-    finally:
-        VPN.clear_users_for_blocking()
-        connection.disconnect()
+
+    if not users or not need_disable:
+        return
+
+    with get_vpn_connection(vpn_params) as connection:
+        api = connection.get_api()
+        ppp_secrets = api.get_resource('/ppp/secret/')
+
+        for user in users:
+            secret = ppp_secrets.get(name=user.login)
+            if secret:
+                ppp_secrets.set(id=secret[0].get('id'), disabled='yes')
+                logger.info(f'Пользователь VPN {user} отключен.')
+
+    VPN.objects.bulk_update(users, ['status'])
+    VPN.clear_users_for_blocking()
 
 
 def get_radius_session(radius_params: dict[str, str]) -> CustomSession:
@@ -185,19 +184,22 @@ def block_radius_users(radius_params: dict[str]) -> None:
     """Блокирует учетные записи на сервере Radius."""
     users = Radius.get_users_to_block()
     need_disable = radius_params.get('RADIUS_NEED_DISABLE_USERS')
-    try:
-        if users and need_disable:
-            session = get_radius_session(radius_params)
-            users_list = ','.join(f'"{user}"' for user in users)
-            ps_script = f"""
-            $users = @({users_list})
-            foreach ($user in $users) {{
-                Disable-LocalUser -Name $user
-            }}
-            """
-            session.run_ps(ps_script)
-    finally:
-        Radius.clear_users_for_blocking()
+
+    if not users or not need_disable:
+        return
+
+    session = get_radius_session(radius_params)
+    users_list = ','.join(f'"{user.login}"' for user in users)
+    ps_script = f"""
+    $users = @({users_list})
+    foreach ($user in $users) {{
+        Disable-LocalUser -Name $user
+    }}
+    """
+    session.run_ps(ps_script)
+
+    Radius.objects.bulk_update(users, ['status'])
+    Radius.clear_users_for_blocking()
 
 
 def get_counters(queryset: QuerySet, field: str) -> dict[str, str]:

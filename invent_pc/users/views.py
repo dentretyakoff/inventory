@@ -136,6 +136,8 @@ def update_users_data(request):
         )
     except Exception as error:
         logger.exception(f'Необработанная ошибка: {str(error)}')
+        Radius.clear_users_for_blocking()
+        VPN.clear_users_for_blocking()
         return JsonResponse(
             {'success': False, 'error': str(error)},
             status=status.HTTP_400_BAD_REQUEST
