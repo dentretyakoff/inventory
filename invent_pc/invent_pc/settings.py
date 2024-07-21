@@ -138,7 +138,11 @@ AD = {
 VPN = {
     'VPN_HOST': os.getenv('VPN_HOST'),
     'VPN_USER': os.getenv('VPN_USER'),
-    'VPN_PASSWORD': os.getenv('VPN_PASSWORD')
+    'VPN_PASSWORD': os.getenv('VPN_PASSWORD'),
+    'VPN_USE_SSL': os.getenv('VPN_USE_SSL', 'False').lower() in ('true',),
+    'VPN_SSL_VERIFY': os.getenv('VPN_SSL_VERIFY', 'False').lower() in ('true',),
+    'VPN_SSL_VERIFY_HOSTNAME': os.getenv('VPN_SSL_VERIFY_HOSTNAME', 'False').lower() in ('true',),
+    'VPN_NEED_DISABLE_USERS': os.getenv('VPN_NEED_DISABLE_USERS', 'False').lower() in ('true',)
 }
 
 # Конфигурация подключения к RADIUS

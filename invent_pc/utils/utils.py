@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import Counter
 
 from django.db.models import QuerySet
@@ -7,12 +8,13 @@ from django.core.paginator import Paginator
 from ldap3 import Server, Connection, SUBTREE
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
-from users.models import Radius
+from users.models import Radius, VPN
 from .fix_router_os import routeros_api_fix
 from .fix_pywinrm import CustomSession
 
 COUNT_PAGES = settings.COUNT_PAGES_PAGINATOR
 AD_STATUS_DISABLED_USER = settings.AD_STATUS_DISABLED_USER
+logger = logging.getLogger(__name__)
 
 
 # Паджинация
@@ -75,18 +77,25 @@ def read_ad_users(ad_params: dict) -> list[dict[str]]:
     return ad_users
 
 
+def get_vpn_connection(
+        vpn_params: dict[str, str]) -> routeros_api_fix.RouterOsApiPool:
+    """Создает подключение к Mikrotik."""
+    params = {
+        'host': vpn_params.get('VPN_HOST'),
+        'username': vpn_params.get('VPN_USER'),
+        'password': vpn_params.get('VPN_PASSWORD'),
+        'use_ssl': vpn_params.get('VPN_USE_SSL'),
+        'ssl_verify': vpn_params.get('VPN_SSL_VERIFY'),
+        'ssl_verify_hostname': vpn_params.get('VPN_SSL_VERIFY_HOSTNAME'),
+        'plaintext_login': True,
+    }
+
+    return routeros_api_fix.RouterOsApiPool(**params)
+
+
 def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
     """Читает учетные записи vpn из Mikrotik."""
-    router_ip = vpn_params.get('VPN_HOST')
-    username = vpn_params.get('VPN_USER')
-    password = vpn_params.get('VPN_PASSWORD')
-
-    connection = routeros_api_fix.RouterOsApiPool(
-        host=router_ip,
-        username=username,
-        password=password,
-        plaintext_login=True
-    )
+    connection = get_vpn_connection(vpn_params)
     api = connection.get_api()
     ppp_secrets = api.get_resource('/ppp/secret/')
     secrets = ppp_secrets.call(
@@ -109,6 +118,29 @@ def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
     connection.disconnect()
 
     return vpn_users
+
+
+def block_vpn_users(vpn_params: dict[str]) -> None:
+    """Блокирует учетные записи VPN в mikrotik."""
+    users = VPN.get_users_to_block()
+    need_disable = vpn_params.get('VPN_NEED_DISABLE_USERS')
+    connection = get_vpn_connection(vpn_params)
+    try:
+        if users and need_disable:
+            api = connection.get_api()
+            ppp_secrets = api.get_resource('/ppp/secret/')
+            for user in users:
+                secret = ppp_secrets.get(name=user)
+                if secret:
+                    ppp_secrets.set(id=secret[0].get('id'), disabled='yes')
+                    logger.info(f'Пользователь VPN {user} отключен.')
+                else:
+                    logger.info(f'Пользователь VPN {user} не найден.')
+    except Exception as e:
+        logger.error(f'Ошибка отключения пользователей VPN: {e}')
+    finally:
+        VPN.clear_users_for_blocking()
+        connection.disconnect()
 
 
 def get_radius_session(radius_params: dict[str, str]) -> CustomSession:

@@ -10,19 +10,22 @@ class StatusChoices(models.TextChoices):
 class BaseUserMixin():
     """Базовый класс четных записей из внешних систем.
     Подмешивает в модели свойство _users_to_block."""
-    _users_to_block = []
-
     @classmethod
     def add_user_to_block(cls, login: str) -> None:
+        if not hasattr(cls, '_users_to_block'):
+            cls._users_to_block = []
         cls._users_to_block.append(login)
 
     @classmethod
     def get_users_to_block(cls) -> list[str]:
+        if not hasattr(cls, '_users_to_block'):
+            cls._users_to_block = []
         return cls._users_to_block
 
     @classmethod
     def clear_users_for_blocking(cls) -> None:
-        cls._users_to_block.clear()
+        if hasattr(cls, '_users_to_block'):
+            cls._users_to_block.clear()
 
     def needs_update(self, user_data):
         """Добавляет всем учетным записям метод для проверки изменений.
