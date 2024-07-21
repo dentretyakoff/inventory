@@ -116,8 +116,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Версия API
 API_VERSION = 'v1'
 
-# Количество компьютеров на странице пагинатора
-COUNT_PAGES_PAGINATOR = 20
+# Количество записей на странице пагинатора
+COUNT_PAGES_PAGINATOR = os.getenv('COUNT_PER_PAGE', 20)
 # Константа для определения уникальности мак-адреса
 COUNT_MAC = 1
 # Дельта для определения устаревшего олнайна компьютеров, в днях
