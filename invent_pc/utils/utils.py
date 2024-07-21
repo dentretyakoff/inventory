@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from ldap3 import Server, Connection, SUBTREE
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
-from users.models import Radius, VPN, StatusChoices
+from users.models import Radius, VPN
 from .fix_router_os import routeros_api_fix, ConnectionWrapper
 from .fix_pywinrm import CustomSession
 
