@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from ldap3 import Server, Connection, SUBTREE
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
+from users.models import Radius
 from .fix_router_os import routeros_api_fix
 from .fix_pywinrm import CustomSession
 
@@ -110,8 +111,8 @@ def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
     return vpn_users
 
 
-def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
-    """Читает учетные записи с сервера Radius."""
+def get_radius_session(radius_params: dict[str, str]) -> CustomSession:
+    """Создает подключение к серверу через WinRM."""
     params = {
         'transport': 'ntlm',
         'target': radius_params.get('RADIUS_HOST'),
@@ -119,7 +120,13 @@ def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
         'auth': (radius_params.get('RADIUS_USER'),
                  radius_params.get('RADIUS_PASSWORD'))
     }
-    session = CustomSession(**params)
+
+    return CustomSession(**params)
+
+
+def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
+    """Читает учетные записи с сервера Radius."""
+    session = get_radius_session(radius_params)
     result = session.run_ps(radius_params.get('RADIUS_SCRIPT'))
     result = result.std_out.decode()
     radius_users = []
@@ -140,6 +147,25 @@ def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
         )
 
     return radius_users
+
+
+def block_radius_users(radius_params: dict[str]) -> None:
+    """Блокирует учетные записи на сервере Radius."""
+    users = Radius.get_users_to_block()
+    need_disable = radius_params.get('RADIUS_NEED_DISABLE_USERS')
+    try:
+        if users and need_disable:
+            session = get_radius_session(radius_params)
+            users_list = ','.join(f'"{user}"' for user in users)
+            ps_script = f"""
+            $users = @({users_list})
+            foreach ($user in $users) {{
+                Disable-LocalUser -Name $user
+            }}
+            """
+            session.run_ps(ps_script)
+    finally:
+        Radius.clear_users_for_blocking()
 
 
 def get_counters(queryset: QuerySet, field: str) -> dict[str, str]:

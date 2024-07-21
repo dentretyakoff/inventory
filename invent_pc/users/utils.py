@@ -9,24 +9,14 @@ def update_or_create_users(
     """Обновляет пользователей или создает новых."""
     existing_users = model.objects.in_bulk(field_name='login')
     new_users = []
-    updated_users = []
 
     for user_data in users_data:
         login = user_data.pop('login')
-        if login in existing_users:
-            user = existing_users[login]
-            needs_update = False
-            for key, value in user_data.items():
-                if getattr(user, key) != value:
-                    setattr(user, key, value)
-                    needs_update = True
-            if needs_update:
-                updated_users.append(user)
-        else:
+        user = existing_users.get(login)
+        if not user:
             new_users.append(model(login=login, **user_data))
-
-    if updated_users:
-        model.objects.bulk_update(updated_users, fields=user_data.keys())
+        elif user.needs_update(user_data):
+            user.save()
 
     if new_users:
         model.objects.bulk_create(new_users)

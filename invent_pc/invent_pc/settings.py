@@ -147,7 +147,8 @@ RADIUS = {
     'RADIUS_SCRIPT': os.getenv('RADIUS_SCRIPT'),
     'RADIUS_USER': os.getenv('RADIUS_USER'),
     'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD'),
-    'RADIUS_SERVER_CERT_VALIDATION': os.getenv('RADIUS_SERVER_CERT_VALIDATION')
+    'RADIUS_SERVER_CERT_VALIDATION': os.getenv('RADIUS_SERVER_CERT_VALIDATION'),
+    'RADIUS_NEED_DISABLE_USERS': os.getenv('RADIUS_NEED_DISABLE_USERS', 'False').lower() in ('true',)
 }
 
 logging.basicConfig(
