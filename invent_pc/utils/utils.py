@@ -1,5 +1,6 @@
 import json
 import logging
+import ssl
 from collections import Counter
 
 from django.db.models import QuerySet
@@ -89,6 +90,10 @@ def get_vpn_connection(
         'ssl_verify_hostname': vpn_params.get('VPN_SSL_VERIFY_HOSTNAME'),
         'plaintext_login': True,
     }
+    root_cert = settings.ROOT_CA_CERT
+    if root_cert.exists():
+        ssl_context = ssl.create_default_context(cafile=str(root_cert))
+        params['ssl_context'] = ssl_context
     connection = routeros_api_fix.RouterOsApiPool(**params)
 
     return ConnectionWrapper(connection)
