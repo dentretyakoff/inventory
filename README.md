@@ -3,10 +3,10 @@
 - [Описание](#desc)
 - [Стек технологий](#stack)
 - [Запуск проекта](#start)
-- [Настройка WinRM](#winrm)
-- [Настройка RouterOS](#router-os)
-- [Опрос клиентов](#win-computers)
-- [Отправка с гипервизоров](#vms)
+      - [Настройка WinRM](#winrm)
+      - [Настройка RouterOS](#router-os)
+      - [Опрос клиентов](#win-computers)
+      - [Отправка с гипервизоров](#vms)
 - [Планы по доработке](#development-plans)
 - [Авторы](#team)
 
@@ -87,6 +87,7 @@ Get-ChildItem wsman:\localhost\Listener\ | Where-Object -Property Keys -like 'Tr
 # Создает Listener и привязывает к нему ваш сертификат
 New-Item -Path WSMan:\localhost\Listener\ -Transport HTTPS -Address * -CertificateThumbPrint $cert.Thumbprint -Force
 ```
+* Если используете самоподписной сертификат, расположите корневой сертифкат в директории с проектом, рядом с файлом manage.py
 
 
 ### Настройка RouterOS <a id="router-os"></a>
