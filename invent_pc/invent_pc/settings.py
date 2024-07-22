@@ -1,4 +1,5 @@
 # flake8: noqa
+import certifi
 import os
 import logging
 from pathlib import Path
@@ -160,3 +161,20 @@ logging.basicConfig(
     format='%(asctime)s - [%(levelname)s] - %(name)s - '
            '%(filename)s.%(funcName)s(%(lineno)d) - %(message)s'
 )
+
+ROOT_CA_CERT = BASE_DIR / os.getenv('ROOT_CA_CERT', 'RootCA.pem')
+if ROOT_CA_CERT.exists():
+    cacert_path = certifi.where()
+    new_cacert_path = os.path.join(os.path.dirname(cacert_path), 'new_cacert.pem')
+
+    with open(cacert_path, 'r') as original_cacert:
+        original_certificates = original_cacert.read()
+
+    with open(ROOT_CA_CERT, 'r') as root_ca:
+        root_ca_certificate = root_ca.read()
+
+    with open(new_cacert_path, 'w') as new_cacert:
+        new_cacert.write(original_certificates)
+        new_cacert.write(root_ca_certificate)
+
+    os.environ['SSL_CERT_FILE'] = new_cacert_path
