@@ -11,7 +11,8 @@ from rest_framework import status
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
 from utils.utils import (check_envs, get_pages, read_ad_users,
-                         read_radius_users, read_vpn_users, get_counters)
+                         read_radius_users, read_vpn_users, get_counters,
+                         block_radius_users, block_vpn_users)
 
 from .filters import UsersFilter
 from .models import VPN, ADUsers, Radius
@@ -123,6 +124,10 @@ def update_users_data(request):
         match_vpn_users()
         match_radius_users()
 
+        # Отключить учетные записи в связных сервисах
+        block_radius_users(radius_params)
+        block_vpn_users(vpn_params)
+
     except (MissingVariableError, RadiusUsersNotFoundError) as error:
         logger.error(str(error))
         return JsonResponse(
@@ -131,6 +136,8 @@ def update_users_data(request):
         )
     except Exception as error:
         logger.exception(f'Необработанная ошибка: {str(error)}')
+        Radius.clear_users_for_blocking()
+        VPN.clear_users_for_blocking()
         return JsonResponse(
             {'success': False, 'error': str(error)},
             status=status.HTTP_400_BAD_REQUEST

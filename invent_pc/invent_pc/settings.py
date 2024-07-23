@@ -1,3 +1,5 @@
+# flake8: noqa
+import certifi
 import os
 import logging
 from pathlib import Path
@@ -115,8 +117,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Версия API
 API_VERSION = 'v1'
 
-# Количество компьютеров на странице пагинатора
-COUNT_PAGES_PAGINATOR = 20
+# Количество записей на странице пагинатора
+COUNT_PAGES_PAGINATOR = os.getenv('COUNT_PER_PAGE', 20)
 # Константа для определения уникальности мак-адреса
 COUNT_MAC = 1
 # Дельта для определения устаревшего олнайна компьютеров, в днях
@@ -137,7 +139,11 @@ AD = {
 VPN = {
     'VPN_HOST': os.getenv('VPN_HOST'),
     'VPN_USER': os.getenv('VPN_USER'),
-    'VPN_PASSWORD': os.getenv('VPN_PASSWORD')
+    'VPN_PASSWORD': os.getenv('VPN_PASSWORD'),
+    'VPN_USE_SSL': os.getenv('VPN_USE_SSL', 'False').lower() in ('true',),
+    'VPN_SSL_VERIFY': os.getenv('VPN_SSL_VERIFY', 'False').lower() in ('true',),
+    'VPN_SSL_VERIFY_HOSTNAME': os.getenv('VPN_SSL_VERIFY_HOSTNAME', 'False').lower() in ('true',),
+    'VPN_NEED_DISABLE_USERS': os.getenv('VPN_NEED_DISABLE_USERS', 'False').lower() in ('true',)
 }
 
 # Конфигурация подключения к RADIUS
@@ -145,7 +151,9 @@ RADIUS = {
     'RADIUS_HOST': os.getenv('RADIUS_HOST'),
     'RADIUS_SCRIPT': os.getenv('RADIUS_SCRIPT'),
     'RADIUS_USER': os.getenv('RADIUS_USER'),
-    'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD')
+    'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD'),
+    'RADIUS_SERVER_CERT_VALIDATION': os.getenv('RADIUS_SERVER_CERT_VALIDATION'),
+    'RADIUS_NEED_DISABLE_USERS': os.getenv('RADIUS_NEED_DISABLE_USERS', 'False').lower() in ('true',)
 }
 
 logging.basicConfig(
@@ -153,3 +161,32 @@ logging.basicConfig(
     format='%(asctime)s - [%(levelname)s] - %(name)s - '
            '%(filename)s.%(funcName)s(%(lineno)d) - %(message)s'
 )
+
+ROOT_CA_CERT = BASE_DIR / os.getenv('ROOT_CA_CERT', 'RootCA.pem')
+if ROOT_CA_CERT.exists():
+    cacert_path = certifi.where()
+
+    with open(cacert_path, 'r+') as original_cacert:
+        original_certificates = original_cacert.read()
+
+        with open(ROOT_CA_CERT, 'r') as root_ca:
+            root_ca_certificate = root_ca.read()
+
+            if root_ca_certificate not in original_certificates:
+                original_cacert.write('\n# RootCA\n')
+                original_cacert.write(root_ca_certificate)
+
+
+INTERMEDIATE_CERT = BASE_DIR / os.getenv('INTERMEDIATE_CERT', 'Intermediate.pem')
+if INTERMEDIATE_CERT.exists():
+    cacert_path = certifi.where()
+
+    with open(cacert_path, 'r+') as original_cacert:
+        original_certificates = original_cacert.read()
+
+        with open(INTERMEDIATE_CERT, 'r') as intermediate:
+            intermediate_certificate = intermediate.read()
+
+            if intermediate_certificate not in original_certificates:
+                original_cacert.write('\n# Intermediate certificate\n')
+                original_cacert.write(intermediate_certificate)

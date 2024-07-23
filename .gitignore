@@ -157,3 +157,4 @@ dmypy.json
 posts/static/
 media/
 
+*.pem
