@@ -165,7 +165,6 @@ logging.basicConfig(
 ROOT_CA_CERT = BASE_DIR / os.getenv('ROOT_CA_CERT', 'RootCA.pem')
 if ROOT_CA_CERT.exists():
     cacert_path = certifi.where()
-    new_cacert_path = os.path.join(os.path.dirname(cacert_path), 'new_cacert.pem')
 
     with open(cacert_path, 'r+') as original_cacert:
         original_certificates = original_cacert.read()
@@ -174,4 +173,20 @@ if ROOT_CA_CERT.exists():
             root_ca_certificate = root_ca.read()
 
             if root_ca_certificate not in original_certificates:
+                original_cacert.write('\n# RootCA\n')
                 original_cacert.write(root_ca_certificate)
+
+
+INTERMEDIATE_CERT = BASE_DIR / os.getenv('INTERMEDIATE_CERT', 'Intermediate.pem')
+if INTERMEDIATE_CERT.exists():
+    cacert_path = certifi.where()
+
+    with open(cacert_path, 'r+') as original_cacert:
+        original_certificates = original_cacert.read()
+
+        with open(INTERMEDIATE_CERT, 'r') as intermediate:
+            intermediate_certificate = intermediate.read()
+
+            if intermediate_certificate not in original_certificates:
+                original_cacert.write('\n# Intermediate certificate\n')
+                original_cacert.write(intermediate_certificate)
