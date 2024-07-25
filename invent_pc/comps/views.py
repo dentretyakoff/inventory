@@ -5,7 +5,7 @@ from django.db.models import Count, Q
 from .models import (Comp, Disk, ItemsChoices,
                      Monitor, Ram, Department,
                      Host, VirtualMachine)
-from .filters import CompFilter
+from .filters import CompFilter, DiskFilter, RamFilter, MonitorFilter
 from .forms import DepartmentFilterForm
 from utils.utils import get_pages, get_counters, sorted_list
 
@@ -71,31 +71,33 @@ def item_edit(request, pc_name, item, item_status, item_id):
 
 def reports(request):
     """Общая статистика."""
-    department_id = request.GET.get('department')
     filter_form = DepartmentFilterForm(request.GET)
-    if department_id:
-        comps = Comp.objects.filter(department=department_id)
-        disks = Disk.objects.filter(status=ItemsChoices.INSTALLED,
-                                    comp__department=department_id)
-    else:
-        comps = Comp.objects.all()
-        disks = Disk.objects.filter(status=ItemsChoices.INSTALLED)
-    count_by_motherboard = get_counters(
-        comps.values('motherboard'), 'motherboard')
-    count_by_win_ver = get_counters(comps.values('win_ver'), 'win_ver')
-    count_by_os_arch = get_counters(comps.values('os_arch'), 'os_arch')
-    count_by_cpu = get_counters(comps.values('cpu'), 'cpu')
-    count_by_disks = get_counters(disks.values('model'), 'model')
+    comps_filter = CompFilter(request.GET, queryset=Comp.objects.all())
+    disk_filter = DiskFilter(request.GET, queryset=Disk.objects.filter())
+    ram_filter = RamFilter(request.GET, queryset=Ram.objects.filter())
+    monitor_filter = MonitorFilter(
+        request.GET, queryset=Monitor.objects.filter())
+
+    items = [('motherboard', comps_filter.qs),
+             ('win_ver', comps_filter.qs),
+             ('os_arch', comps_filter.qs),
+             ('cpu', comps_filter.qs),
+             ('disks', disk_filter.qs),
+             ('rams', ram_filter.qs),
+             ('monitors', monitor_filter.qs)]
 
     context = {
-        'comps_count': comps.count(),
-        'count_by_motherboard': sorted_list(count_by_motherboard),
-        'count_by_win_ver': sorted_list(count_by_win_ver),
-        'count_by_os_arch': sorted_list(count_by_os_arch),
-        'count_by_cpu': sorted_list(count_by_cpu),
-        'count_by_disks': sorted_list(count_by_disks),
+        'comps_count': comps_filter.qs.count(),
         'filter_form': filter_form,
     }
+
+    for item, queryset in items:
+        if item in ['disks', 'rams', 'monitors']:
+            count_by_item = get_counters(queryset.values('model'), 'model')
+        else:
+            count_by_item = get_counters(queryset.values(item), item)
+        context[f'count_by_{item}'] = sorted_list(count_by_item)
+
     return render(request, 'comps/reports.html', context)
 
 
