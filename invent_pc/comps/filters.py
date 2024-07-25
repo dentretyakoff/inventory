@@ -4,7 +4,7 @@ from datetime import timedelta
 import django_filters
 from django.utils import timezone
 
-from .models import Comp, ItemsChoices
+from .models import Comp, ItemsChoices, Disk, Ram, Monitor
 
 
 class CompFilter(django_filters.FilterSet):
@@ -42,3 +42,29 @@ class CompFilter(django_filters.FilterSet):
             return queryset.filter(
                 monitors__status=ItemsChoices.LOST).distinct()
         return queryset
+
+
+class DiskFilter(django_filters.FilterSet):
+    department = django_filters.NumberFilter(method='filter_by_department')
+
+    class Meta:
+        model = Disk
+        fields = ('department',)
+
+    def filter_by_department(self, queryset, name, value):
+        if value is not None:
+            return queryset.filter(comp__department=value,
+                                   status=ItemsChoices.INSTALLED)
+        return queryset
+
+
+class RamFilter(DiskFilter):
+    class Meta:
+        model = Ram
+        fields = ('department',)
+
+
+class MonitorFilter(DiskFilter):
+    class Meta:
+        model = Monitor
+        fields = ('department',)
