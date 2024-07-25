@@ -15,5 +15,11 @@ urlpatterns = [
     path('generate-users-report/',
          views.generate_users_report,
          name='generate_users_report'),
+    path('generate-radius-report/',
+         views.generate_radius_report,
+         name='generate_radius_report'),
+    path('generate-vpn-report/',
+         views.generate_vpn_report,
+         name='generate_vpn_report'),
     path('', views.users_main, name='users_main'),
 ]

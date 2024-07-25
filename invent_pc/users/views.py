@@ -19,7 +19,7 @@ from .models import VPN, ADUsers, Radius
 from .utils import (update_or_create_users,
                     match_vpn_users,
                     match_radius_users,
-                    get_file)
+                    get_file, get_radius_file, get_vpn_file)
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +154,37 @@ def generate_users_report(request):
     excel_file = get_file(users)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  # noqa
-    response['Content-Disposition'] = 'attachment; filename="users_report.xlsx"'  # noqa
+    response['Content-Disposition'] = 'attachment; filename="ad_users_report.xlsx"'  # noqa
+
+    excel_file.save(response)
+
+    return response
+
+
+def generate_radius_report(request):
+    """Формирует список свободных учетных запитсей Radius,
+    отдает файлом Excel."""
+    users = Radius.objects.filter(ad_user__isnull=True)
+
+    excel_file = get_radius_file(users)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  # noqa
+    response['Content-Disposition'] = 'attachment; filename="radius_users_report.xlsx"'  # noqa
+
+    excel_file.save(response)
+
+    return response
+
+
+def generate_vpn_report(request):
+    """Формирует список свободных учетных запитсей VPN,
+    отдает файлом Excel."""
+    users = VPN.objects.filter(ad_user__isnull=True)
+
+    excel_file = get_vpn_file(users)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  # noqa
+    response['Content-Disposition'] = 'attachment; filename="vpn_users_report.xlsx"'  # noqa
 
     excel_file.save(response)
 
