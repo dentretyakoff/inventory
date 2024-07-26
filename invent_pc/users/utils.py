@@ -121,7 +121,7 @@ def get_radius_file(users: Radius) -> openpyxl.Workbook:
     for num, user in enumerate(users, 1):
         ws.append([num, user.fio, user.login])
         if user.status == StatusChoices.INACTIVE:
-            ws.cell(num, 3).fill = openpyxl.styles.PatternFill(
+            ws.cell(num+1, 3).fill = openpyxl.styles.PatternFill(
                 'solid', fgColor='FF0000')  # Красный
 
     return wb
@@ -137,7 +137,7 @@ def get_vpn_file(users: VPN) -> openpyxl.Workbook:
     for num, user in enumerate(users, 1):
         ws.append([num, user.login, user.comment])
         if user.status == StatusChoices.INACTIVE:
-            ws.cell(num, 2).fill = openpyxl.styles.PatternFill(
+            ws.cell(num+1, 2).fill = openpyxl.styles.PatternFill(
                 'solid', fgColor='FF0000')  # Красный
 
     return wb
