@@ -94,6 +94,8 @@ class ADUsers(BaseUserMixin, models.Model):
 
     class Meta:
         ordering = ('fio',)
+        verbose_name = 'Пользователь AD'
+        verbose_name_plural = 'Пользователи AD'
 
 
 class Radius(BaseUserMixin, models.Model):
@@ -111,6 +113,8 @@ class Radius(BaseUserMixin, models.Model):
 
     class Meta:
         ordering = ('login',)
+        verbose_name = 'Пользователь WiFi'
+        verbose_name_plural = 'Пользователи WiFi'
 
 
 class VPN(BaseUserMixin, models.Model):
@@ -128,3 +132,5 @@ class VPN(BaseUserMixin, models.Model):
 
     class Meta:
         ordering = ('login',)
+        verbose_name = 'Пользователь VPN'
+        verbose_name_plural = 'Пользователи VPN'

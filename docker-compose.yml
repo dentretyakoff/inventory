@@ -22,6 +22,7 @@ services:
       sh -c "
         python manage.py migrate &&
         python manage.py collectstatic --noinput &&
+        python manage.py create_admin &&
         cp -r /app/collected_static/. /backend_static/ &&
         cp -r /app/static/. /backend_static/ &&
         gunicorn --bind 0.0.0.0:8000 invent_pc.wsgi"
