@@ -18,6 +18,7 @@
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="vpn" value="active">&#9989;</button>
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="vpn" value="inactive">&#10060;</button>
       </th>
+      <th>Гигротермон</th>
     </form>
   </tr>
   {% for user in page_obj %}
@@ -61,6 +62,18 @@
           {% endif %}
         </span>
         <select name="vpn" class="form-control edit-select" style="display: none;"></select>
+      </td>
+      <td>
+        {% for gigro_user in user.gigro.all %}
+          {{ gigro_user.login }}-{{ gigro_user.db }}
+          {% if gigro_user.status == 'active' %}
+            <span>&#9989;</span>
+          {% elif gigro_user.status == 'inactive'  %}
+            <span>&#10060;</span>
+          {% endif %}<br>
+          {% empty %}
+              -
+        {% endfor %}
       </td>
     </tr>
   {% endfor %}

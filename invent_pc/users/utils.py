@@ -22,48 +22,6 @@ def update_or_create_users(
         model.objects.bulk_create(new_users)
 
 
-def match_vpn_users() -> None:
-    """Сопоставляет VPN с учетными записями AD."""
-    no_vpn_users = ADUsers.objects.filter(vpn=None)
-    vpn_users = {
-        user.comment.lower(): user
-        for user in VPN.objects.filter(
-            ad_user__isnull=True,
-            comment__isnull=False
-        )
-    }
-
-    updated_users = []
-
-    for no_vpn_user in no_vpn_users:
-        for comment, vpn_user in vpn_users.items():
-            if no_vpn_user.fio and no_vpn_user.fio.lower() in comment:
-                no_vpn_user.vpn = vpn_user
-                updated_users.append(no_vpn_user)
-
-    ADUsers.objects.bulk_update(updated_users, ('vpn',))
-
-
-def match_radius_users() -> None:
-    """Сопоставляет Radius с учетными записями AD."""
-    no_radius_users = ADUsers.objects.filter(rdlogin=None)
-    radius_users = Radius.objects.filter(
-        ad_user__isnull=True,
-        fio__isnull=False
-    )
-
-    updated_users = []
-
-    for no_radius_user in no_radius_users:
-        for radius_user in radius_users:
-            if (no_radius_user.fio == radius_user.fio
-                    or no_radius_user.login == radius_user.login):
-                no_radius_user.rdlogin = radius_user
-                updated_users.append(no_radius_user)
-
-    ADUsers.objects.bulk_update(updated_users, ('rdlogin',))
-
-
 def make_clean_wb(title: str, headers: list[str]) -> openpyxl.Workbook:
     """Формирует чистую книгу Excel."""
     wb = openpyxl.Workbook()

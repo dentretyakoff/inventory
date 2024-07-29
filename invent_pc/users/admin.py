@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from comps.admin import NoAddAdmin
-from .models import ADUsers, Radius, VPN
+from .models import ADUsers, Radius, VPN, Gigrotermon
 
 
 @admin.register(ADUsers)
@@ -51,3 +51,20 @@ class VPNAdmin(NoAddAdmin):
         'comment',
     )
     list_filter = ('status',)
+
+
+@admin.register(Gigrotermon)
+class GigrotermonAdmin(NoAddAdmin):
+    fields = (
+        'login',
+        'status',
+        'db',
+        'gigro_id',
+        'ad_user'
+    )
+    list_display_links = ('id', 'login')
+    search_fields = (
+        'login',
+        'db__name',
+    )
+    list_filter = ('status', 'db')
