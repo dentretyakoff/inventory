@@ -1,6 +1,8 @@
 from typing import Any
 from django.db import models
 
+from services.models import MySQLDatabase
+
 
 class StatusChoices(models.TextChoices):
     ACTIVE = 'active', 'Активен'
@@ -80,16 +82,10 @@ class ADUsers(BaseUserMixin, models.Model):
                 and self.status == StatusChoices.INACTIVE)
 
     def save(self, *args: Any, **kwargs: Any) -> None:
-        """Добавляет пользователей VPN и Radius в списки на блокировку
-        если учетная запись AD была заблокирована."""
+        """Добавляет пользователей в список на блокировку
+        если учетная запись была заблокирована."""
         if self.is_blocked:
-            radius_user, vpn_user = self.rdlogin, self.vpn
-            if radius_user:
-                radius_user.status = StatusChoices.INACTIVE
-                Radius.add_user_to_block(radius_user)
-            if vpn_user:
-                vpn_user.status = StatusChoices.INACTIVE
-                VPN.add_user_to_block(vpn_user)
+            ADUsers.add_user_to_block(self)
         return super().save(*args, **kwargs)
 
     class Meta:
@@ -109,7 +105,19 @@ class Radius(BaseUserMixin, models.Model):
     )
 
     def __str__(self):
-        return f'{self.login}'
+        return self.login
+
+    @classmethod
+    def get_users_to_block(cls) -> list[str]:
+        if not hasattr(cls, '_users_to_block'):
+            cls._users_to_block = []
+        ad_users = ADUsers.get_users_to_block()
+        for ad_user in ad_users:
+            if ad_user.rdlogin:
+                radius_user = ad_user.rdlogin
+                radius_user.status = StatusChoices.INACTIVE
+                cls._users_to_block.append(radius_user)
+        return cls._users_to_block
 
     class Meta:
         ordering = ('login',)
@@ -128,9 +136,68 @@ class VPN(BaseUserMixin, models.Model):
     )
 
     def __str__(self):
-        return f'{self.login}'
+        return self.login
+
+    @classmethod
+    def get_users_to_block(cls) -> list[str]:
+        if not hasattr(cls, '_users_to_block'):
+            cls._users_to_block = []
+        ad_users = ADUsers.get_users_to_block()
+        for ad_user in ad_users:
+            if ad_user.rdlogin:
+                vpn_user = ad_user.vpn
+                vpn_user.status = StatusChoices.INACTIVE
+                cls._users_to_block.append(vpn_user)
+        return cls._users_to_block
 
     class Meta:
         ordering = ('login',)
         verbose_name = 'Пользователь VPN'
         verbose_name_plural = 'Пользователи VPN'
+
+
+class Gigrotermon(BaseUserMixin, models.Model):
+    login = models.CharField('Логин', max_length=50)
+    status = models.CharField(
+        max_length=15,
+        choices=StatusChoices.choices,
+        default=StatusChoices.INACTIVE,
+        verbose_name='Статус',
+    )
+    db = models.ForeignKey(
+        MySQLDatabase,
+        on_delete=models.CASCADE,
+        verbose_name='БД Гигротермон',
+    )
+    gigro_id = models.IntegerField(
+        'Гигро id',
+        help_text='ID в БД Гигротермон'
+    )
+    ad_user = models.ForeignKey(
+        ADUsers,
+        verbose_name='Пользователь AD',
+        on_delete=models.CASCADE,
+        related_name='gigro',
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return self.login
+
+    @classmethod
+    def get_users_to_block(cls) -> list[str]:
+        if not hasattr(cls, '_users_to_block'):
+            cls._users_to_block = []
+        return cls._users_to_block
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['login', 'db'],
+                name='unique_login_db'
+            )
+        ]
+        ordering = ('login',)
+        verbose_name = 'Пользователь Гигротермон'
+        verbose_name_plural = 'Пользователи Гигротермон'

@@ -1,7 +1,6 @@
 import json
 import logging
 
-from django.conf import settings
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -10,23 +9,24 @@ from django.http import HttpResponse
 from rest_framework import status
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
-from utils.utils import (check_envs, get_pages, read_ad_users,
-                         read_radius_users, read_vpn_users, get_counters,
-                         block_radius_users, block_vpn_users)
+from utils.utils import get_pages, get_counters
 
 from .filters import UsersFilter
 from .models import VPN, ADUsers, Radius
-from .utils import (update_or_create_users,
-                    match_vpn_users,
-                    match_radius_users,
-                    get_file, get_radius_file, get_vpn_file)
+from .utils import get_file, get_radius_file, get_vpn_file
+from .update_gigrotermon import update_gigrotermon
+from .update_ad import update_ad
+from .update_vpn import update_vpn
+from .update_radius import update_radius
 
 logger = logging.getLogger(__name__)
 
 
 def users_main(request):
     """Список всех учетных записей из AD."""
-    ad_users = ADUsers.objects.all().select_related('rdlogin', 'vpn')
+    ad_users = (ADUsers.objects.all()
+                .select_related('rdlogin', 'vpn')
+                .prefetch_related('gigro'))
     related_statuses = ad_users.values('rdlogin__status', 'vpn__status')
     unrelated_radius_statuses = (Radius.objects
                                  .filter(ad_user__isnull=True)
@@ -107,26 +107,11 @@ def update_users_data(request):
     - VPN Mikrotik
     """
     try:
-        # Проверяем необходимые перменные окружения
-        ad_params = check_envs(settings.AD)
-        vpn_params = check_envs(settings.VPN)
-        radius_params = check_envs(settings.RADIUS)
-
-        # Получем данные из систем
-        ad_users = read_ad_users(ad_params)
-        vpn_users = read_vpn_users(vpn_params)
-        radius_users = read_radius_users(radius_params)
-
-        # Обновляем пользователей в БД
-        update_or_create_users(ADUsers, ad_users)
-        update_or_create_users(VPN, vpn_users)
-        update_or_create_users(Radius, radius_users)
-        match_vpn_users()
-        match_radius_users()
-
-        # Отключить учетные записи в связных сервисах
-        block_radius_users(radius_params)
-        block_vpn_users(vpn_params)
+        # Обновление учетных записей
+        update_ad()
+        update_vpn()
+        update_radius()
+        update_gigrotermon()
 
     except (MissingVariableError, RadiusUsersNotFoundError) as error:
         logger.error(str(error))
@@ -136,12 +121,14 @@ def update_users_data(request):
         )
     except Exception as error:
         logger.exception(f'Необработанная ошибка: {str(error)}')
-        Radius.clear_users_for_blocking()
-        VPN.clear_users_for_blocking()
         return JsonResponse(
             {'success': False, 'error': str(error)},
             status=status.HTTP_400_BAD_REQUEST
         )
+    finally:
+        ADUsers.clear_users_for_blocking()
+        Radius.clear_users_for_blocking()
+        VPN.clear_users_for_blocking()
     return JsonResponse({'success': True}, status=status.HTTP_200_OK)
 
 
