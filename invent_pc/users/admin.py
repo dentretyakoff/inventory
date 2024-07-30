@@ -54,7 +54,8 @@ class VPNAdmin(NoAddAdmin):
 
 
 @admin.register(Gigrotermon)
-class GigrotermonAdmin(NoAddAdmin):
+class GigrotermonAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Gigrotermon._meta.fields]
     fields = (
         'login',
         'status',
@@ -63,6 +64,12 @@ class GigrotermonAdmin(NoAddAdmin):
         'ad_user'
     )
     list_display_links = ('id', 'login')
+    readonly_fields = (
+        'login',
+        'status',
+        'db',
+        'gigro_id'
+    )
     search_fields = (
         'login',
         'db__name',

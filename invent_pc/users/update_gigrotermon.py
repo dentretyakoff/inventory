@@ -23,7 +23,6 @@ def update_gigrotermon():
                         'status': status,
                         'gigro_id': gigro_id,
                         'db': db,
-
                     }
                 )
     update_or_create_gigro_users(Gigrotermon, gigro_users)
