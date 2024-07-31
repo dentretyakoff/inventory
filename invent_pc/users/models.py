@@ -144,7 +144,7 @@ class VPN(BaseUserMixin, models.Model):
             cls._users_to_block = []
         ad_users = ADUsers.get_users_to_block()
         for ad_user in ad_users:
-            if ad_user.rdlogin:
+            if ad_user.vpn:
                 vpn_user = ad_user.vpn
                 vpn_user.status = StatusChoices.INACTIVE
                 cls._users_to_block.append(vpn_user)
