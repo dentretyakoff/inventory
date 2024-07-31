@@ -1,6 +1,7 @@
-from comps.models import Comp, Host
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
 
+from comps.models import Comp, Host
 from .serializers import CompSerializer, HostCreateSerializer
 
 
@@ -11,7 +12,7 @@ class CompCreateViewSet(mixins.CreateModelMixin,
     serializer_class = CompSerializer
 
     def get_object(self):
-        comp = Comp.objects.get(pc_name=self.request.data['pc_name'])
+        comp = get_object_or_404(Comp, pc_name=self.request.data['pc_name'])
         return comp
 
     def patch(self, request, *args, **kwargs):
