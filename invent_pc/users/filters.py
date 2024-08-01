@@ -11,6 +11,7 @@ class UsersFilter(django_filters.FilterSet):
     status = django_filters.CharFilter(field_name='status')
     rdlogin = django_filters.CharFilter(field_name='rdlogin__status')
     vpn = django_filters.CharFilter(field_name='vpn__status')
+    gigro = django_filters.CharFilter(method='filter_gigro')
 
     def filter_all_fields(self, queryset, name, value):
         if value:
@@ -21,4 +22,9 @@ class UsersFilter(django_filters.FilterSet):
                 Q(rdlogin__login__icontains=value) |
                 Q(vpn__login__icontains=value)
             )
+        return queryset
+
+    def filter_gigro(self, queryset, name, value):
+        if value:
+            return queryset.filter(gigro__status=value).distinct()
         return queryset

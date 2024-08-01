@@ -9,9 +9,23 @@ class StatusChoices(models.TextChoices):
     INACTIVE = 'inactive', 'Неактивен'
 
 
-class BaseUserMixin():
-    """Базовый класс четных записей из внешних систем.
-    Подмешивает в модели свойство _users_to_block."""
+class BaseUserMixin(models.Model):
+    """Базовая модель учетных записей из внешних систем."""
+    login = models.CharField('Логин', unique=True, max_length=100)
+    status = models.CharField(
+        max_length=15,
+        choices=StatusChoices.choices,
+        default=StatusChoices.INACTIVE,
+        verbose_name='Статус',
+    )
+    successfully_updated = models.BooleanField(
+        default=True,
+        verbose_name='Успешна обновлена',
+        help_text=('Если информация об учетной записи не поступила '
+                   'при последнем обновлении, галочка снимается, '
+                   'запись можно удалить.')
+    )
+
     @classmethod
     def add_user_to_block(cls, login: str) -> None:
         if not hasattr(cls, '_users_to_block'):
@@ -31,7 +45,7 @@ class BaseUserMixin():
 
     def needs_update(self, user_data):
         """Добавляет всем учетным записям метод для проверки изменений.
-        user_data - данные учетной записи полученные из AD, Radius или VPN.
+        user_data - данные учетной записи полученные из внешней системы.
         """
         needs_update = False
         for key, value in user_data.items():
@@ -40,17 +54,13 @@ class BaseUserMixin():
                 needs_update = True
         return needs_update
 
+    class Meta:
+        abstract = True
 
-class ADUsers(BaseUserMixin, models.Model):
+
+class ADUsers(BaseUserMixin):
     fio = models.CharField('ФИО', max_length=200)
-    login = models.CharField('Логин в AD', unique=True, max_length=100)
     email = models.EmailField('Email', blank=True, null=True)
-    status = models.CharField(
-        max_length=15,
-        choices=StatusChoices.choices,
-        default=StatusChoices.INACTIVE,
-        verbose_name='Статус в AD',
-    )
     rdlogin = models.ForeignKey(
         'Radius',
         on_delete=models.SET_NULL,
@@ -94,15 +104,8 @@ class ADUsers(BaseUserMixin, models.Model):
         verbose_name_plural = 'Пользователи AD'
 
 
-class Radius(BaseUserMixin, models.Model):
+class Radius(BaseUserMixin):
     fio = models.CharField('ФИО', max_length=200)
-    login = models.CharField('Логин в Radius', unique=True, max_length=100)
-    status = models.CharField(
-        max_length=15,
-        choices=StatusChoices.choices,
-        default=StatusChoices.INACTIVE,
-        verbose_name='Статус в Radius',
-    )
 
     def __str__(self):
         return self.login
@@ -125,15 +128,8 @@ class Radius(BaseUserMixin, models.Model):
         verbose_name_plural = 'Пользователи WiFi'
 
 
-class VPN(BaseUserMixin, models.Model):
-    login = models.CharField('Логин VPN', unique=True, max_length=50)
+class VPN(BaseUserMixin):
     comment = models.TextField('Комментарий', blank=True, null=True)
-    status = models.CharField(
-        max_length=15,
-        choices=StatusChoices.choices,
-        default=StatusChoices.INACTIVE,
-        verbose_name='Статус VPN',
-    )
 
     def __str__(self):
         return self.login
@@ -144,7 +140,7 @@ class VPN(BaseUserMixin, models.Model):
             cls._users_to_block = []
         ad_users = ADUsers.get_users_to_block()
         for ad_user in ad_users:
-            if ad_user.rdlogin:
+            if ad_user.vpn:
                 vpn_user = ad_user.vpn
                 vpn_user.status = StatusChoices.INACTIVE
                 cls._users_to_block.append(vpn_user)
@@ -156,14 +152,8 @@ class VPN(BaseUserMixin, models.Model):
         verbose_name_plural = 'Пользователи VPN'
 
 
-class Gigrotermon(BaseUserMixin, models.Model):
+class Gigrotermon(BaseUserMixin):
     login = models.CharField('Логин', max_length=50)
-    status = models.CharField(
-        max_length=15,
-        choices=StatusChoices.choices,
-        default=StatusChoices.INACTIVE,
-        verbose_name='Статус',
-    )
     db = models.ForeignKey(
         MySQLDatabase,
         on_delete=models.CASCADE,

@@ -12,11 +12,18 @@ def update_or_create_users(
 
     for user_data in users_data:
         login = user_data.pop('login')
-        user = existing_users.get(login)
+        user = existing_users.pop(login, None)
+        user_data['successfully_updated'] = True
         if not user:
             new_users.append(model(login=login, **user_data))
         elif user.needs_update(user_data):
             user.save()
+
+    if existing_users:
+        for existing_user in existing_users.values():
+            existing_user.successfully_updated = False
+        model.objects.bulk_update(existing_users.values(),
+                                  ['successfully_updated'])
 
     if new_users:
         model.objects.bulk_create(new_users)

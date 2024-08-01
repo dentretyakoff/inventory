@@ -23,7 +23,6 @@ def update_gigrotermon():
                         'status': status,
                         'gigro_id': gigro_id,
                         'db': db,
-
                     }
                 )
     update_or_create_gigro_users(Gigrotermon, gigro_users)
@@ -42,14 +41,19 @@ def update_or_create_gigro_users(
     for user_data in users_data:
         login = user_data.pop('login')
         db = user_data.pop('db')
-        user = existing_users.get((login, db))
+        user = existing_users.pop((login, db), None)
+        user_data['successfully_updated'] = True
 
         if not user:
             new_users.append(model(login=login, db=db, **user_data))
         elif user.needs_update(user_data):
-            for field, value in user_data.items():
-                setattr(user, field, value)
             user.save()
+
+    if existing_users:
+        for existing_user in existing_users.values():
+            existing_user.successfully_updated = False
+        model.objects.bulk_update(existing_users.values(),
+                                  ['successfully_updated'])
 
     if new_users:
         model.objects.bulk_create(new_users)

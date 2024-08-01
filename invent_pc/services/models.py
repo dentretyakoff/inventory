@@ -1,11 +1,16 @@
+from cryptography.fernet import Fernet
+from django.conf import settings
 from django.db import models
 
+from exceptions.services import EncryptionKeyMissingError
 
-class MySQLDatabase(models.Model):
+
+class BaseService(models.Model):
+    """Базовая модель сервиса."""
     name = models.CharField(
         'Название',
         max_length=255,
-        help_text='Произвольное название БД'
+        help_text='Произвольное название сервиса'
     )
     host = models.CharField(
         'Сервер',
@@ -16,31 +21,64 @@ class MySQLDatabase(models.Model):
     user = models.CharField(
         'Пользователь',
         max_length=255,
-        help_text='Пользователь для подключения к БД'
+        help_text='Пользователь для подключения к сервису'
     )
     password = models.CharField(
         'Пароль',
         max_length=255,
-        help_text='Пароль для подключения к БД'
-    )
-    database = models.CharField(
-        'Название БД',
-        max_length=255
+        help_text='Пароль для подключения к сервису'
     )
     active = models.BooleanField(
-        'Активна',
-        help_text='Подключение происходит только к активным БД'
+        'Активен',
+        help_text='Подключение происходит только к активному сервису'
     )
 
     def __str__(self):
         return self.name
+
+    def __get_fernet(self):
+        encryption_key = settings.ENCRYPTION_KEY
+        if not encryption_key:
+            raise EncryptionKeyMissingError(
+                'ENCRYPTION_KEY не заполнен в .env')
+        return Fernet(encryption_key)
+
+    def encrypt_password(self, password):
+        fernet = self.__get_fernet()
+        encrypted_password = fernet.encrypt(password.encode())
+        return encrypted_password.decode()
+
+    def decrypt_password(self, encrypted_password):
+        fernet = self.__get_fernet()
+        decrypted_password = fernet.decrypt(encrypted_password.encode())
+        return decrypted_password.decode()
+
+    def save(self, *args, **kwargs):
+        """Шифрование пароля перед сохранением."""
+        if self.password and not self.password.startswith('gAAAAA'):
+            self.password = self.encrypt_password(self.password)
+        super().save(*args, **kwargs)
+
+    def get_decrypted_password(self):
+        """Возвращает расшифрованный пароль."""
+        return self.decrypt_password(self.password)
+
+    class Meta:
+        abstract = True
+
+
+class MySQLDatabase(BaseService):
+    database = models.CharField(
+        'Название БД',
+        max_length=255
+    )
 
     def to_dict(self):
         return {
             'host': self.host,
             'port': self.port,
             'user': self.user,
-            'password': self.password,
+            'password': self.get_decrypted_password(),
             'database': self.database,
         }
 

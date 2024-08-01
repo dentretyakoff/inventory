@@ -40,7 +40,7 @@
  - [pywinrm 0.4.3](https://github.com/diyan/pywinrm) Библиотека для удаленного управления Windows через WinRM (Windows Remote Management).
 
 ### Запуск проекта <a id="start"></a>
-- клонируйте репозиторий: `git clone git@github.com:dentretyakoff/inventory.git`
+- клонируйте репозиторий: `git clone <ваш репозиторий>`
 - установите docker
 ```
 sudo apt update
