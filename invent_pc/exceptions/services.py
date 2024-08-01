@@ -9,3 +9,7 @@ class MissingVariableError(InventoryError):
 
 class RadiusUsersNotFoundError(InventoryError):
     """Не найдены пользователи в группе на сервере Radius."""
+
+
+class EncryptionKeyMissingError(InventoryError):
+    """Ключ шифрования ENCRYPTION_KEY не заполнен в settings."""

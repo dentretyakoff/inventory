@@ -191,3 +191,6 @@ if INTERMEDIATE_CERT.exists():
             if intermediate_certificate not in original_certificates:
                 original_cacert.write('\n# Intermediate certificate\n')
                 original_cacert.write(intermediate_certificate)
+
+# Ключ для шифрования паролей сервисов
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
