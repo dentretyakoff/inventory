@@ -200,8 +200,8 @@ class Comp(models.Model):
 
     def is_offline_long_time(self):
         """Определение компьютеров с большим офлайн периодом, для удаления."""
-        six_months_ago = timezone.now() - timedelta(days=settings.DAYS_OFFLINE)
-        return self.online_date < six_months_ago
+        days = timezone.now() - timedelta(days=settings.DAYS_OFFLINE)
+        return self.online_date < days
 
     def __str__(self):
         return self.pc_name

@@ -15,6 +15,9 @@ $(document).ready(function() {
 
                 $('#success-message').text('Данные успешно обновлены!').show();
                 $('#error-message').hide();
+                setTimeout(function() {
+                    location.reload(); // Перезагрузка страницы
+                }, 1500); // Задержка 2 секунды
             },
             error: function(xhr) {
                 $('#loading-indicator').hide();

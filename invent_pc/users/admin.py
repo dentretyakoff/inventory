@@ -1,7 +1,18 @@
 from django.contrib import admin
 
-from comps.admin import NoAddAdmin
 from .models import ADUsers, Radius, VPN, Gigrotermon
+
+
+class NoAddAdmin(admin.ModelAdmin):
+    def __init__(self, model, admin_site):
+        self.list_display = [field.name for field in model._meta.fields]
+        self.readonly_fields = [field.name for field in model._meta.fields]
+        self.list_filter = ('status', 'successfully_updated')
+        self.list_display_links = ('id', 'login')
+        super().__init__(model, admin_site)
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(ADUsers)
@@ -12,15 +23,14 @@ class ADuserAdmin(NoAddAdmin):
         'email',
         'status',
         'rdlogin',
-        'vpn'
+        'vpn',
+        'successfully_updated'
     )
-    list_display_links = ('id', 'fio')
     search_fields = (
         'fio',
         'login',
         'email',
     )
-    list_filter = ('status',)
 
 
 @admin.register(Radius)
@@ -29,13 +39,12 @@ class RadiusAdmin(NoAddAdmin):
         'fio',
         'login',
         'status',
+        'successfully_updated'
     )
-    list_display_links = ('id', 'fio')
     search_fields = (
         'fio',
         'login',
     )
-    list_filter = ('status',)
 
 
 @admin.register(VPN)
@@ -44,34 +53,46 @@ class VPNAdmin(NoAddAdmin):
         'login',
         'comment',
         'status',
+        'successfully_updated'
     )
-    list_display_links = ('id', 'login')
     search_fields = (
         'login',
         'comment',
     )
-    list_filter = ('status',)
 
 
 @admin.register(Gigrotermon)
 class GigrotermonAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in Gigrotermon._meta.fields]
+    list_display = (
+        'id',
+        'login',
+        'status',
+        'successfully_updated',
+        'db',
+        'gigro_id',
+        'ad_user',
+    )
     fields = (
         'login',
         'status',
         'db',
         'gigro_id',
-        'ad_user'
+        'ad_user',
+        'successfully_updated'
     )
     list_display_links = ('id', 'login')
     readonly_fields = (
         'login',
         'status',
         'db',
-        'gigro_id'
+        'gigro_id',
+        'successfully_updated'
     )
     search_fields = (
         'login',
         'db__name',
     )
-    list_filter = ('status', 'db')
+    list_filter = ('status', 'db', 'successfully_updated')
+
+    def has_add_permission(self, request):
+        return False

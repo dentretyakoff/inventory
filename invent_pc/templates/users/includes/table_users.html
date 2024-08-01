@@ -6,6 +6,9 @@
     <th>Логин</th>
     <th>Email</th>
     <form action="{% url 'users:users_main' %}" method="get">
+      {% for key, value in request.GET.items %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+      {% endfor %}
       <th>Статус
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="active">&#9989;</button>
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="inactive">&#10060;</button>
@@ -18,12 +21,19 @@
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="vpn" value="active">&#9989;</button>
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="vpn" value="inactive">&#10060;</button>
       </th>
-      <th>Гигротермон</th>
+      <th>
+        Гигротермон
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="gigro" value="active">&#9989;</button>
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="gigro" value="inactive">&#10060;</button>
+      </th>
     </form>
   </tr>
   {% for user in page_obj %}
     <tr data-user-id="{{ user.id }}">
-      <td>{{ user.fio }}</td>
+      <td>
+        {{ user.fio }}
+        {% if not user.successfully_updated %}⚠️(устарела){% endif %}
+      </td>
       <td>{{ user.login }}</td>
       <td>{% if user.email %}{{ user.email }}{% endif %}</td>
       <td>
@@ -70,7 +80,7 @@
             <span>&#9989;</span>
           {% elif gigro_user.status == 'inactive'  %}
             <span>&#10060;</span>
-          {% endif %}<br>
+          {% endif %}{% if not gigro_user.successfully_updated %}⚠️(устарела){% endif %}<br>
           {% empty %}
               -
         {% endfor %}
