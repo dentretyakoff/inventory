@@ -6,6 +6,7 @@
   - [Генерация ENCRYPTION_KEY](#prep-encryption-key)
   - [Настройка WinRM](#winrm)
   - [Настройка RouterOS](#router-os)
+  - [Настройка параметров сервисов](#prep-services)
   - [Опрос клиентов](#win-computers)
   - [Отправка с гипервизоров](#vms)
 - [Планы по доработке](#development-plans)
@@ -38,6 +39,7 @@
  - [ldap3 2.9.1](https://ldap3.readthedocs.io/) Библиотека для работы с LDAP на языке Python.
  - [RouterOS-api 0.18.1](https://github.com/socialwifi/RouterOS-api) Библиотека для взаимодействия с API RouterOS.
  - [pywinrm 0.4.3](https://github.com/diyan/pywinrm) Библиотека для удаленного управления Windows через WinRM (Windows Remote Management).
+
 
 ### Запуск проекта <a id="start"></a>
 - клонируйте репозиторий: `git clone git@github.com:dentretyakoff/inventory.git`
@@ -73,7 +75,8 @@ server {
 - Настройте автозапуск docker, напрмиер так `https://blog.site-home.ru/docker-compose-systemd.html`
 Приложение доступно по адресу http://localhost/
 
-### Генерация ENCRYPTION_KEY <a id="prep-encryption-key"></a>
+
+#### Генерация ENCRYPTION_KEY <a id="prep-encryption-key"></a>
 Для успешного шифрования паролей внешних сервисов необходимо заполнить переменную `ENCRYPTION_KEY` в файле `.env`.
 
 Команда для генерации ключа:
@@ -87,7 +90,8 @@ ENCRYPTION_KEY='wfFouqX4-6O-Eqv6nLzRXiVYVgEj-Vfp9PVRF-6fLWQ='
 ```
 *Если вы утратили ключ, необходимо сгенерировать новый и перезаполнить все пароли сервисов.
 
-### Настройка WinRM <a id="winrm"></a>
+
+#### Настройка WinRM <a id="winrm"></a>
 На сервере откуда планируется получать учетные записи Radius создайте пользователя `inventory` с правми администратора и в PowerShell выполните следующие команды:
 ```
 Enable-PSRemoting -Force
@@ -105,7 +109,7 @@ New-Item -Path WSMan:\localhost\Listener\ -Transport HTTPS -Address * -Certifica
 * Если используете самоподписной сертификат, расположите корневой сертифкат в директории с проектом, рядом с файлом manage.py
 
 
-### Настройка RouterOS <a id="router-os"></a>
+#### Настройка RouterOS <a id="router-os"></a>
 На сервере с RouterOS или Mikrotik создайте пользователя с правами на чтение.
 ```
 /user add name=inventory group=read password=yourpassword
@@ -115,16 +119,27 @@ New-Item -Path WSMan:\localhost\Listener\ -Transport HTTPS -Address * -Certifica
 /ip service set numbers="api" disabled="no"
 ```
 
-### Опрос клиентов <a id="win-computers"></a>
+#### Настройка параметров сервисов <a id="prep-services"></a>
+Для успешного подключения к внешним сервисам(AD, Radius, MIkrotik) необходимо настроить параметры подключений в админ-панели Django.
+ - Войдите в админ-панель `http://localhost/admin/` с тему учетными данными которые указали в файле `.env`.
+ - Откройте раздел Services и нажмите "Добавить" напротив нужного сервиса.
+ - Заполните параметры и нажмите "Сохранить".
+ - На странице `http://localhost:8000/users/` нажмите кнопку "Обновить данные", если параметры верны данные успешно обновятся.
+
+
+#### Опрос клиентов <a id="win-computers"></a>
 Для сбора информации с клиентов можно использовать `invent_pc_api.ps1`, запускать с любой Windows-машины от пользователя имеющего административные права на клиенских ПК.
 
-### Отправка с гипервизоров <a id="vms"></a>
+
+#### Отправка с гипервизоров <a id="vms"></a>
 Для отправки информации о виртуальных машинах можно использовать скрипт `vms.ps1`, запускать на сервере Hyper-V под админом.
+
 
 ### Планы по доработке <a id="development-plans"></a>
 - Использовать django-filters вместо условий во views.py
 - Авторизация на всех страницах
 - Переписать взаимодействие с сервисами с помощью абстрактного класса ExternalService
+
 
 ### Авторы <a id="team"></a>
 Денис Третьяков

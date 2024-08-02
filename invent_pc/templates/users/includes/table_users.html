@@ -4,11 +4,13 @@
   <tr>
     <th>ФИО</th>
     <th>Логин</th>
-    <th>Email</th>
     <form action="{% url 'users:users_main' %}" method="get">
       {% for key, value in request.GET.items %}
         <input type="hidden" name="{{ key }}" value="{{ value }}">
       {% endfor %}
+      <th>Email
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="email" value="True">&#9993;</button>
+      </th>
       <th>Статус
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="active">&#9989;</button>
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="inactive">&#10060;</button>

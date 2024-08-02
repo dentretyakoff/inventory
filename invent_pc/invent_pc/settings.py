@@ -127,35 +127,6 @@ DAYS_OFFLINE = 180
 
 # Конфигурация подключения к AD
 AD_STATUS_DISABLED_USER = (514, 66050)
-AD = {
-    'AD_HOST': os.getenv('AD_HOST'),
-    'AD_DOMAIN': os.getenv('AD_DOMAIN'),
-    'AD_USER': os.getenv('AD_USER'),
-    'AD_PASSWORD': os.getenv('AD_PASSWORD'),
-    'AD_SEARCH_BASE': os.getenv('AD_SEARCH_BASE'),
-    'AD_SEARCH_FILTER': os.getenv('AD_SEARCH_FILTER')
-}
-
-# Конфигурация подключения к Mikrotik
-VPN = {
-    'VPN_HOST': os.getenv('VPN_HOST'),
-    'VPN_USER': os.getenv('VPN_USER'),
-    'VPN_PASSWORD': os.getenv('VPN_PASSWORD'),
-    'VPN_USE_SSL': os.getenv('VPN_USE_SSL', 'False').lower() in ('true',),
-    'VPN_SSL_VERIFY': os.getenv('VPN_SSL_VERIFY', 'False').lower() in ('true',),
-    'VPN_SSL_VERIFY_HOSTNAME': os.getenv('VPN_SSL_VERIFY_HOSTNAME', 'False').lower() in ('true',),
-    'VPN_NEED_DISABLE_USERS': os.getenv('VPN_NEED_DISABLE_USERS', 'False').lower() in ('true',)
-}
-
-# Конфигурация подключения к RADIUS
-RADIUS = {
-    'RADIUS_HOST': os.getenv('RADIUS_HOST'),
-    'RADIUS_SCRIPT': os.getenv('RADIUS_SCRIPT'),
-    'RADIUS_USER': os.getenv('RADIUS_USER'),
-    'RADIUS_PASSWORD': os.getenv('RADIUS_PASSWORD'),
-    'RADIUS_SERVER_CERT_VALIDATION': os.getenv('RADIUS_SERVER_CERT_VALIDATION'),
-    'RADIUS_NEED_DISABLE_USERS': os.getenv('RADIUS_NEED_DISABLE_USERS', 'False').lower() in ('true',)
-}
 
 logging.basicConfig(
     level=logging.INFO,

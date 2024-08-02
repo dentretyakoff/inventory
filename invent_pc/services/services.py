@@ -1,6 +1,15 @@
+import logging
 from abc import ABC, abstractmethod
 
-from .mysqlmanager import MySQLConnectionManager
+from ldap3 import Server, Connection, SUBTREE
+
+from exceptions.services import RadiusUsersNotFoundError
+from users.models import VPN, Radius
+from utils.fix_pywinrm import CustomSession
+from .context_managers import MySQLConnectionManager, MikrotikConnectionManager
+
+
+logger = logging.getLogger(__name__)
 
 
 class ExternalService(ABC):
@@ -62,3 +71,107 @@ class GigrotermonService(ExternalService):
     def block_users(self, users, session):
         """Заблокировать пользователей."""
         pass
+
+
+class ADService(ExternalService):
+    def session(self, host, port, user, password):
+        """Создать сессию."""
+        server = Server(host, port)
+        return Connection(server, user=user, password=password)
+
+    def get_users(self, session, base_dn, seatch_filter):
+        """Получить список пользователей."""
+        session.bind()
+        result = session.extend.standard.paged_search(
+            base_dn,
+            seatch_filter,
+            SUBTREE,
+            get_operational_attributes=True,
+            attributes=(
+                'cn', 'sAMAccountName', 'wWWHomePage', 'userAccountControl'),
+            paged_size=1000,
+            generator=True
+        )
+        return result
+
+    def block_users(self, users):
+        """Заблокировать пользователей."""
+        pass
+
+
+class MikrotikService(ExternalService):
+    def session(
+            self, host, port, user, password, use_ssl,
+            ssl_verify, ssl_verify_hostname):
+        """Создать сессию."""
+        return MikrotikConnectionManager(
+            host, port, user, password, use_ssl,
+            ssl_verify, ssl_verify_hostname)
+
+    def get_users(self, session):
+        """Получить список пользователей."""
+        api = session.get_api()
+        ppp_secrets = api.get_resource('/ppp/secret/')
+        secrets = ppp_secrets.call(
+            'print',
+            {'proplist': 'name,comment,disabled'}
+        )
+        return secrets
+
+    def block_users(self, session, need_disable):
+        """Заблокировать пользователей."""
+        users = VPN.get_users_to_block()
+
+        if not users or not need_disable:
+            return
+
+        api = session.get_api()
+        ppp_secrets = api.get_resource('/ppp/secret/')
+
+        for user in users:
+            secret = ppp_secrets.get(name=user.login)
+            if secret:
+                ppp_secrets.set(id=secret[0].get('id'), disabled='yes')
+                logger.info(f'Пользователь VPN {user} отключен.')
+
+        VPN.objects.bulk_update(users, ['status'])
+
+
+class RadiusService(ExternalService):
+    def session(self, host, user, password, cert_validation):
+        """Создать сессию."""
+        validation = {True: 'validate', False: 'ignore'}
+        return CustomSession(
+            transport='ntlm',
+            target=host,
+            server_cert_validation=validation[cert_validation],
+            auth=(user, password)
+        )
+
+    def get_users(self, session, ps_script):
+        """Получить список пользователей."""
+        result = session.run_ps(ps_script)
+        result = result.std_out.decode()
+
+        if not result:
+            raise RadiusUsersNotFoundError('Не найдены пользователи в группе')
+
+        return result
+
+    def block_users(self, session, need_disable):
+        """Заблокировать пользователей."""
+        users = Radius.get_users_to_block()
+
+        if not users or not need_disable:
+            return
+
+        users_list = ','.join(f'"{user.login}"' for user in users)
+        ps_script = f"""
+        $users = @({users_list})
+        foreach ($user in $users) {{
+            Disable-LocalUser -Name $user
+        }}
+        """
+        session.run_ps(ps_script)
+
+        Radius.objects.bulk_update(users, ['status'])
