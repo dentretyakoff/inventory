@@ -11,7 +11,7 @@ def update_gigrotermon():
     service = GigrotermonService()
     gigro_users = []
     for db in databases:
-        with service.session(**db.to_dict()) as conn:
+        with service.session(**db.credentials()) as conn:
             result = service.get_users(conn)
             for gigro_id, login, gigro_status in result:
                 status = StatusChoices.ACTIVE
@@ -25,8 +25,9 @@ def update_gigrotermon():
                         'db': db,
                     }
                 )
-    update_or_create_gigro_users(Gigrotermon, gigro_users)
-    match_gigro_users()
+    if gigro_users:
+        update_or_create_gigro_users(Gigrotermon, gigro_users)
+        match_gigro_users()
 
 
 def update_or_create_gigro_users(

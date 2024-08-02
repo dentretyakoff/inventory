@@ -1,92 +1,41 @@
-import logging
-import ssl
-
-from django.conf import settings
-
-from utils.fix_router_os import routeros_api_fix, ConnectionWrapper
-from users.models import VPN, ADUsers
-from utils.utils import check_envs
+from services.models import Mikrotik
+from services.services import MikrotikService
+from users.models import VPN, ADUsers, StatusChoices
 from .utils import update_or_create_users
-
-
-logger = logging.getLogger(__name__)
 
 
 def update_vpn():
     """Обновляет учетные записи VPN."""
-    vpn_params = check_envs(settings.VPN)
-    vpn_users = read_vpn_users(vpn_params)
-    update_or_create_users(VPN, vpn_users)
-    match_vpn_users()
-    block_vpn_users(vpn_params)
+    mikrotiks = Mikrotik.objects.filter(active=True)
+    service = MikrotikService()
+    vpn_users = []
+    for mikrotik in mikrotiks:
+        with service.session(**mikrotik.credentials()) as conn:
+            result = service.get_users(conn)
+            for secret in result:
+                user_status = StatusChoices.ACTIVE
+                if secret['disabled'] == 'true':
+                    user_status = StatusChoices.INACTIVE
+                vpn_users.append(
+                    {
+                        'login': secret.get('name'),
+                        'comment': secret.get('comment'),
+                        'status': user_status
+                    }
+                )
+    if vpn_users:
+        update_or_create_users(VPN, vpn_users)
+        match_vpn_users()
+    block_vpn_users()
 
 
-def get_vpn_connection(
-        vpn_params: dict[str, str]) -> ConnectionWrapper:
-    """Создает подключение к Mikrotik."""
-    params = {
-        'host': vpn_params.get('VPN_HOST'),
-        'username': vpn_params.get('VPN_USER'),
-        'password': vpn_params.get('VPN_PASSWORD'),
-        'use_ssl': vpn_params.get('VPN_USE_SSL'),
-        'ssl_verify': vpn_params.get('VPN_SSL_VERIFY'),
-        'ssl_verify_hostname': vpn_params.get('VPN_SSL_VERIFY_HOSTNAME'),
-        'plaintext_login': True,
-    }
-    root_cert = settings.ROOT_CA_CERT
-    if root_cert.exists():
-        ssl_context = ssl.create_default_context(cafile=str(root_cert))
-        params['ssl_context'] = ssl_context
-    connection = routeros_api_fix.RouterOsApiPool(**params)
-
-    return ConnectionWrapper(connection)
-
-
-def read_vpn_users(vpn_params: dict[str]) -> list[dict[str, str]]:
-    """Читает учетные записи vpn из Mikrotik."""
-    with get_vpn_connection(vpn_params) as connection:
-        api = connection.get_api()
-        ppp_secrets = api.get_resource('/ppp/secret/')
-        secrets = ppp_secrets.call(
-            'print',
-            {'proplist': 'name,comment,disabled'}
-        )
-        vpn_users = []
-
-        for secret in secrets:
-            user_status = 'active'
-            if secret['disabled'] == 'true':
-                user_status = 'inactive'
-            vpn_users.append(
-                {
-                    'login': secret.get('name'),
-                    'comment': secret.get('comment'),
-                    'status': user_status
-                }
-            )
-
-    return vpn_users
-
-
-def block_vpn_users(vpn_params: dict[str]) -> None:
+def block_vpn_users() -> None:
     """Блокирует учетные записи VPN в mikrotik."""
-    users = VPN.get_users_to_block()
-    need_disable = vpn_params.get('VPN_NEED_DISABLE_USERS')
-
-    if not users or not need_disable:
-        return
-
-    with get_vpn_connection(vpn_params) as connection:
-        api = connection.get_api()
-        ppp_secrets = api.get_resource('/ppp/secret/')
-
-        for user in users:
-            secret = ppp_secrets.get(name=user.login)
-            if secret:
-                ppp_secrets.set(id=secret[0].get('id'), disabled='yes')
-                logger.info(f'Пользователь VPN {user} отключен.')
-
-    VPN.objects.bulk_update(users, ['status'])
+    mikrotiks = Mikrotik.objects.filter(active=True)
+    service = MikrotikService()
+    for mikrotik in mikrotiks:
+        with service.session(**mikrotik.credentials()) as conn:
+            service.block_users(conn, mikrotik.need_disable)
 
 
 def match_vpn_users() -> None:

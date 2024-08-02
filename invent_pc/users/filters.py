@@ -12,6 +12,13 @@ class UsersFilter(django_filters.FilterSet):
     rdlogin = django_filters.CharFilter(field_name='rdlogin__status')
     vpn = django_filters.CharFilter(field_name='vpn__status')
     gigro = django_filters.CharFilter(method='filter_gigro')
+    email = django_filters.BooleanFilter(
+        field_name='email', method='filter_email')
+
+    def filter_email(self, queryset, name, value):
+        if value:
+            return queryset.filter(email__isnull=False)
+        return queryset
 
     def filter_all_fields(self, queryset, name, value):
         if value:

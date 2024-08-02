@@ -1,80 +1,44 @@
 import json
 
-from django.conf import settings
-
-from users.models import Radius, ADUsers
-from utils.fix_pywinrm import CustomSession
-from exceptions.services import RadiusUsersNotFoundError
-from utils.utils import check_envs
+from services.models import RadiusServer
+from services.services import RadiusService
+from users.models import Radius, ADUsers, StatusChoices
 from .utils import update_or_create_users
 
 
 def update_radius():
     """Обновляет учетные записи Radius."""
-    radius_params = check_envs(settings.RADIUS)
-    radius_users = read_radius_users(radius_params)
-    update_or_create_users(Radius, radius_users)
-    match_radius_users()
-    block_radius_users(radius_params)
-
-
-def get_radius_session(radius_params: dict[str, str]) -> CustomSession:
-    """Создает подключение к серверу через WinRM."""
-    params = {
-        'transport': 'ntlm',
-        'target': radius_params.get('RADIUS_HOST'),
-        'server_cert_validation': radius_params.get('RADIUS_SERVER_CERT_VALIDATION'),  # noqa
-        'auth': (radius_params.get('RADIUS_USER'),
-                 radius_params.get('RADIUS_PASSWORD'))
-    }
-
-    return CustomSession(**params)
-
-
-def read_radius_users(radius_params: dict[str]) -> list[dict[str, str]]:
-    """Читает учетные записи с сервера Radius."""
-    session = get_radius_session(radius_params)
-    result = session.run_ps(radius_params.get('RADIUS_SCRIPT'))
-    result = result.std_out.decode()
+    radius_servers = RadiusServer.objects.filter(active=True)
+    service = RadiusService()
     radius_users = []
+    for radius_server in radius_servers:
+        session = service.session(**radius_server.credentials())
+        result = service.get_users(
+            session, radius_server.read_users_ps_script)
+        for user in json.loads(result):
+            user_status = StatusChoices.ACTIVE
+            if user['Disabled']:
+                user_status = StatusChoices.INACTIVE
+            radius_users.append(
+                {
+                    'fio': user.get('FullName'),
+                    'login': user.get('Name'),
+                    'status': user_status
+                }
+            )
+    if radius_users:
+        update_or_create_users(Radius, radius_users)
+        match_radius_users()
+    block_radius_users()
 
-    if not result:
-        raise RadiusUsersNotFoundError('Не найдены пользователи в группе')
 
-    for user in json.loads(result):
-        user_status = 'active'
-        if user['Disabled']:
-            user_status = 'inactive'
-        radius_users.append(
-            {
-                'fio': user.get('FullName'),
-                'login': user.get('Name'),
-                'status': user_status
-            }
-        )
-
-    return radius_users
-
-
-def block_radius_users(radius_params: dict[str]) -> None:
+def block_radius_users() -> None:
     """Блокирует учетные записи на сервере Radius."""
-    users = Radius.get_users_to_block()
-    need_disable = radius_params.get('RADIUS_NEED_DISABLE_USERS')
-
-    if not users or not need_disable:
-        return
-
-    session = get_radius_session(radius_params)
-    users_list = ','.join(f'"{user.login}"' for user in users)
-    ps_script = f"""
-    $users = @({users_list})
-    foreach ($user in $users) {{
-        Disable-LocalUser -Name $user
-    }}
-    """
-    session.run_ps(ps_script)
-
-    Radius.objects.bulk_update(users, ['status'])
+    radius_servers = RadiusServer.objects.filter(active=True)
+    service = RadiusService()
+    for radius_server in radius_servers:
+        session = service.session(**radius_server.credentials())
+        service.block_users(session, radius_server.need_disable)
 
 
 def match_radius_users() -> None:
