@@ -60,4 +60,10 @@
       {% endwith %}
     </ul>
   </div>
+  <div class="mx-auto">
+    {% if user.is_authenticated %}
+      <small>{{ user.get_full_name }}: {{ user.username }}</small>
+      <a class="btn btn-outline-secondary" href="{% url 'users:logout' %}">Выйти</a>
+    {% endif %}
+  </div>
 </nav>

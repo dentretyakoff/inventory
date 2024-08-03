@@ -1,0 +1,36 @@
+<!-- templates/users/registration/login.html -->
+
+{% extends 'base.html' %}
+{% block title %}Войти{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-3 p-5">
+    <div class="card">
+      <div
+        class="card-header text-center text-success"
+        style="font-size: 2rem; font-weight: bold;"
+      >Inventory
+      </div>
+      <div class="card-body">
+        {% include 'core/errors.html' %}
+        <form method="post"
+          {% if action_url %}
+            action="{% url action_url %}"
+          {% endif %}
+        >
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="user" class="form-label">Имя пользователя</label>
+          <input type="text" class="form-control" name="username" id="user" required>
+        </div>
+        <div class="mb-4">
+          <label for="pass" class="form-label">Пароль</label>
+          <input type="password" name="password" class="form-control" id="pass" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Войти</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

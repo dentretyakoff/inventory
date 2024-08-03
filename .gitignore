@@ -2,6 +2,8 @@
 logs/
 logs_/
 
+img/
+
 # temp dirs, files
 temp/
 
