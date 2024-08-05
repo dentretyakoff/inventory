@@ -15,11 +15,11 @@ class Migration(migrations.Migration):
             name='successfully_updated',
             field=models.BooleanField(default=True, help_text='Если информация об учетной записи не поступила при последнем обновлении, галочка снимается, запись можно удалить.', verbose_name='Успешна обновлена'),
         ),
-        migrations.AddField(
-            model_name='gigrotermon',
-            name='successfully_updated',
-            field=models.BooleanField(default=True, help_text='Если информация об учетной записи не поступила при последнем обновлении, галочка снимается, запись можно удалить.', verbose_name='Успешна обновлена'),
-        ),
+        # migrations.AddField(
+        #     model_name='gigrotermon',
+        #     name='successfully_updated',
+        #     field=models.BooleanField(default=True, help_text='Если информация об учетной записи не поступила при последнем обновлении, галочка снимается, запись можно удалить.', verbose_name='Успешна обновлена'),
+        # ),
         migrations.AddField(
             model_name='radius',
             name='successfully_updated',

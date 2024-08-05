@@ -4,8 +4,8 @@ import logging
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from rest_framework import status
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
@@ -22,6 +22,7 @@ from .update_radius import update_radius
 logger = logging.getLogger(__name__)
 
 
+@login_required
 def users_main(request):
     """Список всех учетных записей из AD."""
     ad_users = (ADUsers.objects.all()
@@ -63,7 +64,7 @@ def users_main(request):
     return render(request, 'users/users.html', context)
 
 
-@csrf_exempt
+@login_required
 def edit_user(request):
     """Редактирование связаных учетных записей пользователя."""
     if request.method == 'POST':
@@ -88,18 +89,21 @@ def edit_user(request):
                         status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+@login_required
 def get_rdlogins(request):
     """Получить список доступных учетных записей Radius."""
     rdlogins = list(Radius.objects.filter(ad_user=None).values('id', 'login'))
     return JsonResponse(rdlogins, safe=False)
 
 
+@login_required
 def get_vpns(request):
     """Получить список доступных учетных записей VPN."""
     vpns = list(VPN.objects.filter(ad_user=None).values('id', 'login'))
     return JsonResponse(vpns, safe=False)
 
 
+@login_required
 def update_users_data(request):
     """Обновляет учетные данные из внешних систем.
     - Active Directory
@@ -132,6 +136,7 @@ def update_users_data(request):
     return JsonResponse({'success': True}, status=status.HTTP_200_OK)
 
 
+@login_required
 def generate_users_report(request):
     """Формирует список связных учетных записей, отдает файлом Excel."""
     users = ADUsers.objects.all().filter(
@@ -148,6 +153,7 @@ def generate_users_report(request):
     return response
 
 
+@login_required
 def generate_radius_report(request):
     """Формирует список свободных учетных запитсей Radius,
     отдает файлом Excel."""
@@ -163,6 +169,7 @@ def generate_radius_report(request):
     return response
 
 
+@login_required
 def generate_vpn_report(request):
     """Формирует список свободных учетных запитсей VPN,
     отдает файлом Excel."""

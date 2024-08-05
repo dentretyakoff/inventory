@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.db.models import Count, Q
@@ -10,6 +11,7 @@ from .forms import DepartmentFilterForm
 from utils.utils import get_pages, get_counters, sorted_list
 
 
+@login_required
 def index(request):
     """Список всех компьютеров."""
     filter_form = DepartmentFilterForm(request.GET)
@@ -29,6 +31,7 @@ def index(request):
     return render(request, 'comps/index.html', context)
 
 
+@login_required
 def comp_detail(request, pc_name):
     """Детальная информация о компьютере."""
     comp = get_object_or_404(Comp, pc_name=pc_name)
@@ -38,6 +41,7 @@ def comp_detail(request, pc_name):
     return render(request, 'comps/comp_detail.html', context)
 
 
+@login_required
 def comp_delete(request, pc_name):
     """Удалить компьютер."""
     comp = get_object_or_404(Comp, pc_name=pc_name)
@@ -45,6 +49,7 @@ def comp_delete(request, pc_name):
     return redirect('comps:index')
 
 
+@login_required
 def item_edit(request, pc_name, item, item_status, item_id):
     """Подтверждение установки/снятие диска на компьютере."""
     models = {
@@ -69,6 +74,7 @@ def item_edit(request, pc_name, item, item_status, item_id):
     return redirect('comps:comp_detail', pc_name=pc_name)
 
 
+@login_required
 def reports(request):
     """Общая статистика."""
     filter_form = DepartmentFilterForm(request.GET)
@@ -101,6 +107,7 @@ def reports(request):
     return render(request, 'comps/reports.html', context)
 
 
+@login_required
 def comps_by_item(request, item_type):
     """Список компьютеров с выбранным оборудованием."""
     item = request.GET.get('item')
@@ -131,6 +138,7 @@ def comps_by_item(request, item_type):
     return render(request, 'comps/comps_by_items.html', context)
 
 
+@login_required
 def departments(request):
     """Список отделов с количеством компов."""
     departments = Department.objects.all().order_by('name')
@@ -138,6 +146,7 @@ def departments(request):
     return render(request, 'comps/departments.html', context)
 
 
+@login_required
 def department_delete(request, department_id):
     """Удалить департамент."""
     department = get_object_or_404(Department, id=department_id)
@@ -145,6 +154,7 @@ def department_delete(request, department_id):
     return redirect('comps:departments')
 
 
+@login_required
 def vms(request):
     """Список хостов с виртуальными машинами."""
     hosts = Host.objects.all().prefetch_related(
