@@ -1,0 +1,47 @@
+<!-- templates/users/includes/table_users_vpn.html -->
+
+<table class="table table-striped table-hover">
+  <tr>
+    <th>Логин</th>
+    <th>Комментарий</th>
+    <form action="{% url 'users:users_vpn' %}" method="get">
+      <th>Статус
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="active">&#9989;</button>
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="inactive">&#10060;</button>
+      </th>
+    </form>
+    <th>Пользователь AD</th>
+    <th>Срок действия</th>
+  </tr>
+  {% for user in page_obj %}
+    <tr data-user-id="{{ user.id }}">
+      <td>
+        {{ user.login }}
+        {% if not user.successfully_updated %}⚠️(устарела){% endif %}
+      </td>
+      <td>
+        {{ user.comment|default_if_none:"-" }}
+      </td>
+      <td>
+        {% if user.status == 'active' %}
+          <span>&#9989;</span>
+        {% else %}
+          <span>&#10060;</span>
+        {% endif %}
+      </td>
+      <td>
+        {% for ad_user in user.ad_user.all %}
+          {{ ad_user }}
+          {% if ad_user.status == 'active' %}
+            <span>&#9989;</span>
+          {% elif ad_user.status == 'inactive'  %}
+            <span>&#10060;</span>
+          {% endif %}
+          {% empty %}
+              -
+        {% endfor %}
+      </td>
+      <td> - </td>
+    </tr>
+  {% endfor %}
+</table>

@@ -1,0 +1,43 @@
+<!-- templates/users/includes/table_users_gigro.html -->
+
+<table class="table table-striped table-hover">
+  <tr>
+    <th>Логин</th>
+    <th>БД Гигротермон</th>
+    <form action="{% url 'users:users_gigro' %}" method="get">
+      <th>Статус
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="active">&#9989;</button>
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="status" value="inactive">&#10060;</button>
+      </th>
+    </form>
+    <th>Гигротермон-id</th>
+    <th>Пользователь AD</th>
+    <th>Срок действия</th>
+  </tr>
+  {% for user in page_obj %}
+    <tr data-user-id="{{ user.id }}">
+      <td>
+        {{ user.login }}
+        {% if not user.successfully_updated %}⚠️(устарела){% endif %}
+      </td>
+      <td>{{ user.db }}</td>
+      <td>
+        {% if user.status == 'active' %}
+          <span>&#9989;</span>
+        {% else %}
+          <span>&#10060;</span>
+        {% endif %}
+      </td>
+      <td>{{ user.gigro_id }}</td>
+      <td>
+        {{ user.ad_user|default_if_none:"-" }}
+        {% if user.ad_user.status == 'active' %}
+          <span>&#9989;</span>
+        {% elif user.ad_user.status == 'inactive' %}
+          <span>&#10060;</span>
+        {% endif %}
+      </td>
+      <td> - </td>
+    </tr>
+  {% endfor %}
+</table>

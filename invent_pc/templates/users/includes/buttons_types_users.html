@@ -1,0 +1,28 @@
+<!-- templates/users/includes/buttons_types_users.html -->
+
+<div class="btn-group" role="group">
+  {% with request.resolver_match.view_name as view_name %}
+    <a
+      href="{% url 'users:users_main' %}"
+      class="btn btn-outline-primary btn-sm {% if view_name == 'users:users_main' %}active{% endif %}"
+    >Active Directory</a>
+  {% endwith %}
+  {% with request.resolver_match.view_name as view_name %}
+    <a
+      href="{% url 'users:users_radius' %}"
+      class="btn btn-outline-primary btn-sm {% if view_name == 'users:users_radius' %}active{% endif %}"
+    >Wi-Fi</a>
+  {% endwith %}
+  {% with request.resolver_match.view_name as view_name %}
+    <a
+      href="{% url 'users:users_vpn' %}"
+      class="btn btn-outline-primary btn-sm {% if view_name == 'users:users_vpn' %}active{% endif %}"
+    >VPN</a>
+  {% endwith %}
+  {% with request.resolver_match.view_name as view_name %}
+    <a
+      href="{% url 'users:users_gigro' %}"
+      class="btn btn-outline-primary btn-sm {% if view_name == 'users:users_gigro' %}active{% endif %}"
+    >Гигротермон</a>
+  {% endwith %}
+</div>

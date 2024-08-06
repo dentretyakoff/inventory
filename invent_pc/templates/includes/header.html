@@ -42,7 +42,10 @@
       {% endwith %}
       {% with request.resolver_match.view_name as view_name %}
         <li>
-          <a class="nav-link {% if view_name  == 'users:users_main' %}active{% endif %}"
+          <a class="nav-link 
+            {% if view_name == 'users:users_main' or view_name == 'users:users_radius' or view_name == 'users:users_vpn' or view_name == 'users:users_gigro' %}
+              active
+            {% endif %}"
             href="{% url 'users:users_main' %}"
           >
             Учетные записи
