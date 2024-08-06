@@ -1,6 +1,8 @@
 import openpyxl
+from django_filters import FilterSet
 from django.db.models import Model
 
+from utils.utils import get_counters, get_pages
 from .models import ADUsers, Radius, VPN, StatusChoices
 
 
@@ -106,3 +108,42 @@ def get_vpn_file(users: VPN) -> openpyxl.Workbook:
                 'solid', fgColor='FF0000')  # Красный
 
     return wb
+
+
+def get_users_base_context(request, user_filter: FilterSet) -> dict[any]:
+    """Формирует базовый context для страниц учетных записей."""
+    ad_users = (ADUsers.objects.all()
+                .select_related('rdlogin', 'vpn')
+                .prefetch_related('gigro'))
+    related_statuses = ad_users.values('rdlogin__status', 'vpn__status')
+    unrelated_radius_statuses = (Radius.objects
+                                 .filter(ad_user__isnull=True)
+                                 .values('status'))
+    unrelated_vpn_statuses = (VPN.objects
+                              .filter(ad_user__isnull=True)
+                              .values('status'))
+
+    ad_users_statuses = get_counters(ad_users.values('status'), 'status')
+    radius_users_statuses = get_counters(related_statuses, 'rdlogin__status')
+    vpn_users_statuses = get_counters(related_statuses, 'vpn__status')
+
+    unrelated_radius_users_statuses = get_counters(
+        unrelated_radius_statuses, 'status')
+    unrelated_vpn_users_statuses = get_counters(
+        unrelated_vpn_statuses, 'status')
+
+    page_obj = get_pages(request, user_filter.qs)
+    current_query_params = request.GET.copy()
+    current_query_params.pop('page', None)
+
+    context = {
+        'page_obj': page_obj,
+        'ad_users_statuses': ad_users_statuses,
+        'radius_users_statuses': radius_users_statuses,
+        'vpn_users_statuses': vpn_users_statuses,
+        'unrelated_radius_users_statuses': unrelated_radius_users_statuses,
+        'unrelated_vpn_users_statuses': unrelated_vpn_users_statuses,
+        'current_query_params': current_query_params,
+    }
+
+    return context

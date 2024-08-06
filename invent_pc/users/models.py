@@ -20,7 +20,7 @@ class BaseUserMixin(models.Model):
     )
     successfully_updated = models.BooleanField(
         default=True,
-        verbose_name='Успешна обновлена',
+        verbose_name='Успешно обновлена',
         help_text=('Если информация об учетной записи не поступила '
                    'при последнем обновлении, галочка снимается, '
                    'запись можно удалить.')

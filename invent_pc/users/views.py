@@ -9,11 +9,12 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import status
 
 from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
-from utils.utils import get_pages, get_counters
 
-from .filters import UsersFilter
-from .models import VPN, ADUsers, Radius
-from .utils import get_file, get_radius_file, get_vpn_file
+from .filters import (UsersFilter, RadiusUsersFilter,
+                      VPNUsersFilter, GigroUsersFilter)
+from .models import VPN, ADUsers, Radius, Gigrotermon
+from .utils import (get_file, get_radius_file,
+                    get_vpn_file, get_users_base_context)
 from .update_gigrotermon import update_gigrotermon
 from .update_ad import update_ad
 from .update_vpn import update_vpn
@@ -28,38 +29,46 @@ def users_main(request):
     ad_users = (ADUsers.objects.all()
                 .select_related('rdlogin', 'vpn')
                 .prefetch_related('gigro'))
-    related_statuses = ad_users.values('rdlogin__status', 'vpn__status')
-    unrelated_radius_statuses = (Radius.objects
-                                 .filter(ad_user__isnull=True)
-                                 .values('status'))
-    unrelated_vpn_statuses = (VPN.objects
-                              .filter(ad_user__isnull=True)
-                              .values('status'))
-
-    ad_users_statuses = get_counters(ad_users.values('status'), 'status')
-    radius_users_statuses = get_counters(related_statuses, 'rdlogin__status')
-    vpn_users_statuses = get_counters(related_statuses, 'vpn__status')
-
-    unrelated_radius_users_statuses = get_counters(
-        unrelated_radius_statuses, 'status')
-    unrelated_vpn_users_statuses = get_counters(
-        unrelated_vpn_statuses, 'status')
-
     user_filter = UsersFilter(request.GET, queryset=ad_users)
+    context = get_users_base_context(request, user_filter)
+    context['header'] = 'Active Directory'
+    context['table_template'] = 'users/includes/table_users.html'
 
-    page_obj = get_pages(request, user_filter.qs)
-    current_query_params = request.GET.copy()
-    current_query_params.pop('page', None)
+    return render(request, 'users/users.html', context)
 
-    context = {
-        'page_obj': page_obj,
-        'ad_users_statuses': ad_users_statuses,
-        'radius_users_statuses': radius_users_statuses,
-        'vpn_users_statuses': vpn_users_statuses,
-        'unrelated_radius_users_statuses': unrelated_radius_users_statuses,
-        'unrelated_vpn_users_statuses': unrelated_vpn_users_statuses,
-        'current_query_params': current_query_params,
-    }
+
+@login_required
+def users_radius(request):
+    """Список всех учетных записей Radius."""
+    radius_users = Radius.objects.all().prefetch_related('ad_user')
+    user_filter = RadiusUsersFilter(request.GET, queryset=radius_users)
+    context = get_users_base_context(request, user_filter)
+    context['header'] = 'Wi-Fi'
+    context['table_template'] = 'users/includes/table_users_radius.html'
+
+    return render(request, 'users/users.html', context)
+
+
+@login_required
+def users_vpn(request):
+    """Список всех учетных записей VPN."""
+    vpn_users = VPN.objects.all().prefetch_related('ad_user')
+    user_filter = VPNUsersFilter(request.GET, queryset=vpn_users)
+    context = get_users_base_context(request, user_filter)
+    context['header'] = 'VPN'
+    context['table_template'] = 'users/includes/table_users_vpn.html'
+
+    return render(request, 'users/users.html', context)
+
+
+@login_required
+def users_gigro(request):
+    """Список всех учетных записей Гигротермон."""
+    gigro_users = Gigrotermon.objects.all().select_related('ad_user')
+    user_filter = GigroUsersFilter(request.GET, queryset=gigro_users)
+    context = get_users_base_context(request, user_filter)
+    context['header'] = 'Гигротермон'
+    context['table_template'] = 'users/includes/table_users_gigro.html'
 
     return render(request, 'users/users.html', context)
 
