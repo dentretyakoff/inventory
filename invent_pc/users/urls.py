@@ -26,8 +26,8 @@ urlpatterns = [
         template_name='users/registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(
         template_name='users/registration/logged_out.html'), name='logout'),
-    path('users/', views.users_main, name='users_main'),
-    path('users-radius/', views.users_radius, name='users_radius'),
-    path('users-vpn/', views.users_vpn, name='users_vpn'),
-    path('users-gigro/', views.users_gigro, name='users_gigro'),
+    path('ad/', views.users_main, name='users_main'),
+    path('radius/', views.users_radius, name='users_radius'),
+    path('vpn/', views.users_vpn, name='users_vpn'),
+    path('gigro/', views.users_gigro, name='users_gigro'),
 ]
