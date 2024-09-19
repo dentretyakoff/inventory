@@ -3,7 +3,7 @@ import logging
 
 from django.db.models import Q
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from rest_framework import status
@@ -45,6 +45,7 @@ def users_radius(request):
     context = get_users_base_context(request, user_filter)
     context['header'] = 'Wi-Fi'
     context['table_template'] = 'users/includes/table_users_radius.html'
+    context['account_type'] = 'radius'
 
     return render(request, 'users/users.html', context)
 
@@ -57,6 +58,7 @@ def users_vpn(request):
     context = get_users_base_context(request, user_filter)
     context['header'] = 'VPN'
     context['table_template'] = 'users/includes/table_users_vpn.html'
+    context['account_type'] = 'vpn'
 
     return render(request, 'users/users.html', context)
 
@@ -69,6 +71,7 @@ def users_gigro(request):
     context = get_users_base_context(request, user_filter)
     context['header'] = 'Гигротермон'
     context['table_template'] = 'users/includes/table_users_gigro.html'
+    context['account_type'] = 'gigrotermon'
 
     return render(request, 'users/users.html', context)
 
@@ -192,3 +195,23 @@ def generate_vpn_report(request):
     excel_file.save(response)
 
     return response
+
+
+@login_required
+def update_expiration_date(request):
+    """Обновляет срок действия учетной записи."""
+    account_types = {'radius': Radius, 'vpn': VPN, 'gigrotermon': Gigrotermon}
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        expiration_date = data.get('expiration_date')
+        account_type = data.get('account_type')
+        user_id = data.get('user_id')
+        user = get_object_or_404(account_types[account_type], id=user_id)
+        user.expiry_date = expiration_date
+        user.save()
+
+        return JsonResponse({'success': True}, status=status.HTTP_200_OK)
+
+    return JsonResponse({'success': False},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
