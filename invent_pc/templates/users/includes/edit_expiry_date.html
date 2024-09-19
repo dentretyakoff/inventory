@@ -1,0 +1,10 @@
+<!-- templates/users/includes/edit_expiry_date.html -->
+
+<td>
+  <button class="btn btn-sm edit-expiry-date-btn" data-user-id="{{ user.id }}">&#128221;</button>
+  <button class="btn btn-sm delete-expiry-date-btn" data-user-id="{{ user.id }}">&#128465;</button>
+  <button class="btn btn-sm save-expiry-date-btn" data-user-id="{{ user.id }}" style="display: none;">&#128190;</button>
+  <span id="display_expiration_{{ user.id }}" data-account-type="{{ account_type }}">{{ user.expiry_date|date:"d.m.Y" }}</span>
+  <input type="date" id="input_expiration_{{ user.id }}" value="{{ user.expiry_date }}" style="display:none;">
+  <p class="error-message" id="error_message_{{ user.id }}" style="display:none;color:red;"></p>
+</td>

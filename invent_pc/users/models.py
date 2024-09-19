@@ -25,6 +25,11 @@ class BaseUserMixin(models.Model):
                    'при последнем обновлении, галочка снимается, '
                    'запись можно удалить.')
     )
+    expiry_date = models.DateField(
+        'Срок действия',
+        null=True,
+        blank=True
+    )
 
     @classmethod
     def add_user_to_block(cls, login: str) -> None:

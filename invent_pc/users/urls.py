@@ -30,4 +30,7 @@ urlpatterns = [
     path('radius/', views.users_radius, name='users_radius'),
     path('vpn/', views.users_vpn, name='users_vpn'),
     path('gigro/', views.users_gigro, name='users_gigro'),
+    path('update-expiration-date/',
+         views.update_expiration_date,
+         name='update_expiration_date'),
 ]
