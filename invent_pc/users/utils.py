@@ -1,9 +1,14 @@
+import logging
+
 import openpyxl
 from django_filters import FilterSet
 from django.db.models import Model
 
 from utils.utils import get_counters, get_pages
 from .models import ADUsers, Radius, VPN, StatusChoices
+
+
+logger = logging.getLogger(__name__)
 
 
 def update_or_create_users(

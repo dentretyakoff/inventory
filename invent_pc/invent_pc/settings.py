@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'django_apscheduler',
     'rest_framework',
     'api.apps.ApiConfig',
     'comps.apps.CompsConfig',
@@ -132,6 +133,9 @@ DAYS_OFFLINE = 180
 
 # Конфигурация подключения к AD
 AD_STATUS_DISABLED_USER = (514, 66050)
+
+# Интервал опроса сервисов, для получения списка учетных записей
+SCHEDULER_INTERVAL = int(os.getenv('SCHEDULER_INTERVAL', 86400))
 
 logging.basicConfig(
     level=logging.INFO,

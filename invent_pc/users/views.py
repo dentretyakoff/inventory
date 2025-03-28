@@ -19,6 +19,7 @@ from .update_gigrotermon import update_gigrotermon
 from .update_ad import update_ad
 from .update_vpn import update_vpn
 from .update_radius import update_radius
+from .update_rocket import update_rocket
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +123,7 @@ def update_users_data(request):
     try:
         # Обновление учетных записей
         update_ad()
+        update_rocket()
         update_vpn()
         update_radius()
         update_gigrotermon()

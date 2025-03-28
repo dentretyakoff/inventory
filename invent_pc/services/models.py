@@ -176,3 +176,27 @@ class RadiusServer(BaseService):
         ordering = ('id',)
         verbose_name = 'Radius'
         verbose_name_plural = 'Radius'
+
+
+class RocketChat(BaseService):
+    host = models.CharField(
+        'Сервер',
+        max_length=255,
+        help_text=('IP-адрес или dns-имя сервера, пример: '
+                   '"http://rocket.yourdomen.org" или '
+                   '"https://rocket.yourdomen.org"')
+    )
+    port = None
+    need_disable = models.BooleanField('Блокировать учетные записи')
+
+    def credentials(self):
+        return {
+            'host': self.host,
+            'user': self.user,
+            'password': self.get_decrypted_password()
+        }
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'RocketChat'
+        verbose_name_plural = 'RocketChat'
