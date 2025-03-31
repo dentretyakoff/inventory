@@ -15,6 +15,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'Develop_KEY')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'django_apscheduler',
     'rest_framework',
     'api.apps.ApiConfig',
     'comps.apps.CompsConfig',
@@ -132,6 +138,9 @@ DAYS_OFFLINE = 180
 
 # Конфигурация подключения к AD
 AD_STATUS_DISABLED_USER = (514, 66050)
+
+# Интервал опроса сервисов, для получения списка учетных записей
+SCHEDULER_INTERVAL = int(os.getenv('SCHEDULER_INTERVAL', 86400))
 
 logging.basicConfig(
     level=logging.INFO,

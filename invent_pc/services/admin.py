@@ -2,7 +2,13 @@ from django.conf import settings
 from django.contrib import admin, messages
 
 from exceptions.services import EncryptionKeyMissingError
-from .models import MySQLDatabase, ActiveDirectory, Mikrotik, RadiusServer
+from .models import (
+    MySQLDatabase,
+    ActiveDirectory,
+    Mikrotik,
+    RadiusServer,
+    RocketChat
+)
 
 
 class BaseServiceAdmin(admin.ModelAdmin):
@@ -119,6 +125,29 @@ class RadiusServerAdmin(BaseServiceAdmin):
         'password',
         'cert_validation',
         'read_users_ps_script',
+        'need_disable',
+        'active'
+    )
+    list_display_links = ('id', 'name')
+    search_fields = ('name',)
+    list_filter = ('active',)
+
+
+@admin.register(RocketChat)
+class RocketChatAdmin(BaseServiceAdmin):
+    list_display = (
+        'id',
+        'name',
+        'host',
+        'user',
+        'need_disable',
+        'active'
+    )
+    fields = (
+        'name',
+        'host',
+        'user',
+        'password',
         'need_disable',
         'active'
     )

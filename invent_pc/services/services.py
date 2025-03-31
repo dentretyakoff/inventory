@@ -2,9 +2,10 @@ import logging
 from abc import ABC, abstractmethod
 
 from ldap3 import Server, Connection, SUBTREE
+from rocketchat_API.rocketchat import RocketChat
 
 from exceptions.services import RadiusUsersNotFoundError
-from users.models import VPN, Radius
+from users.models import VPN, Radius, ADUsers
 from utils.fix_pywinrm import CustomSession
 from .context_managers import MySQLConnectionManager, MikrotikConnectionManager
 
@@ -175,3 +176,31 @@ class RadiusService(ExternalService):
         session.run_ps(ps_script)
 
         Radius.objects.bulk_update(users, ['status'])
+
+
+class RocketChatService(ExternalService):
+    def session(self, host, user, password):
+        """Создать сессию."""
+        return RocketChat(user, password, server_url=host)
+
+    def get_users(self, session, ps_script):
+        """Получить список пользователей."""
+        raise NotImplementedError
+
+    def block_users(self, session, need_disable):
+        """Заблокировать пользователей."""
+        users = ADUsers.get_users_to_block()
+
+        if not users or not need_disable:
+            return
+
+        for user in users:
+            user_info = session.users_info(username=user.login).json()
+            if user_info.get('success'):
+                user_id = user_info['user']['_id']
+                session.users_update(user_id=user_id, active=False).json()
+                logger.info(
+                    f'Пользователь {user.login} отключен на '
+                    'сервере RocketChat.')
+            else:
+                logger.info(f'{user} не найден')
