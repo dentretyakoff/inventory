@@ -62,7 +62,7 @@ class GigrotermonService(ExternalService):
             LEFT JOIN options status_option 
                 ON status_actual.curID = status_option.id
             WHERE
-                o.objectType = 'user';
+                o.objectType = 'user' AND o.deleted = 0;
         """  # noqa
         cursor.execute(query)
         users = cursor.fetchall()

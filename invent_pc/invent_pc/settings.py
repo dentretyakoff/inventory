@@ -11,6 +11,13 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - [%(levelname)s] - %(name)s - '
+           '%(filename)s.%(funcName)s(%(lineno)d) - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'Develop_KEY')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
@@ -142,12 +149,6 @@ AD_STATUS_DISABLED_USER = (514, 66050)
 # Интервал опроса сервисов, для получения списка учетных записей
 SCHEDULER_INTERVAL = int(os.getenv('SCHEDULER_INTERVAL', 86400))
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - [%(levelname)s] - %(name)s - '
-           '%(filename)s.%(funcName)s(%(lineno)d) - %(message)s'
-)
-
 ROOT_CA_CERT = BASE_DIR / os.getenv('ROOT_CA_CERT', 'RootCA.pem')
 if ROOT_CA_CERT.exists():
     cacert_path = certifi.where()
@@ -181,7 +182,7 @@ if INTERMEDIATE_CERT.exists():
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 
 # Настройки для авторизации по LDAP
-AUTH_LDAP_SERVER_URI = f'ldap://{os.getenv("AUTH_LDAP_SERVER_URI")}'
+AUTH_LDAP_SERVER_URI = os.getenv('AUTH_LDAP_SERVER_URI')
 AUTH_LDAP_BIND_DN = os.getenv('AUTH_LDAP_BIND_DN')
 AUTH_LDAP_BIND_PASSWORD = os.getenv('AUTH_LDAP_BIND_PASSWORD')
 AUTH_LDAP_USER_SEARCH = LDAPSearch(
@@ -212,3 +213,16 @@ AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+LDAP_IGNORE_CERT = os.getenv('LDAP_IGNORE_CERT', 'false').lower() == 'true'
+LDAP_CA_CERT_FILE = BASE_DIR / os.getenv('LDAP_CA_CERT_FILE', 'ca.pem')
+
+if LDAP_IGNORE_CERT:
+    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+elif LDAP_CA_CERT_FILE.exists():
+    logger.info(
+        'Для авторизации LDAP будет использован сертификат: '
+        f'{LDAP_CA_CERT_FILE}')
+    ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, str(LDAP_CA_CERT_FILE))
+else:
+    logger.warning(f'LDAP CA сертификат не найден: {LDAP_CA_CERT_FILE}')
