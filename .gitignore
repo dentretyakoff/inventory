@@ -5,6 +5,8 @@ logs_/
 img/
 
 README_.md
+*.zip
+
 
 # temp dirs, files
 temp/
