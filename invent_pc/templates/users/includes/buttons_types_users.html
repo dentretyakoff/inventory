@@ -15,9 +15,15 @@
   {% endwith %}
   {% with request.resolver_match.view_name as view_name %}
     <a
+      href="{% url 'users:users_pfsense' %}"
+      class="btn btn-outline-primary btn-sm {% if view_name == 'users:users_pfsense' %}active{% endif %}"
+    >VPN(Pfsense)</a>
+  {% endwith %}
+  {% with request.resolver_match.view_name as view_name %}
+    <a
       href="{% url 'users:users_vpn' %}"
       class="btn btn-outline-primary btn-sm {% if view_name == 'users:users_vpn' %}active{% endif %}"
-    >VPN</a>
+    >VPN(микротик)</a>
   {% endwith %}
   {% with request.resolver_match.view_name as view_name %}
     <a

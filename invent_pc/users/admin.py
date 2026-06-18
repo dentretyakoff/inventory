@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ADUsers, Radius, VPN, Gigrotermon
+from .models import VPN, ADUsers, Gigrotermon, PfSenseUser, Radius
 
 
 class NoAddAdmin(admin.ModelAdmin):
@@ -96,3 +96,20 @@ class GigrotermonAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+@admin.register(PfSenseUser)
+class PfSenseUserAdmin(NoAddAdmin):
+    fields = (
+        'login',
+        'pfsense_id',
+        'description',
+        'disabled',
+        'status',
+        'successfully_updated'
+    )
+    search_fields = (
+        'login',
+        'pfsense_id',
+        'description',
+    )

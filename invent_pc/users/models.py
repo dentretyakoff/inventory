@@ -1,6 +1,6 @@
 from typing import Any
-from django.db import models
 
+from django.db import models
 from services.models import MySQLDatabase
 
 
@@ -76,6 +76,14 @@ class ADUsers(BaseUserMixin):
         null=True,
         blank=True,
         verbose_name='Учетная запись VPN'
+    )
+    pfsense = models.ForeignKey(
+        'PfSenseUser',
+        on_delete=models.SET_NULL,
+        related_name='ad_user',
+        null=True,
+        blank=True,
+        verbose_name='Учетная запись pfSense'
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -191,3 +199,34 @@ class Gigrotermon(BaseUserMixin):
         ordering = ('login',)
         verbose_name = 'Пользователь Гигротермон'
         verbose_name_plural = 'Пользователи Гигротермон'
+
+
+class PfSenseUser(BaseUserMixin):
+    description = models.TextField('Описание', blank=True, null=True)
+    disabled = models.BooleanField('Отключен в pfSense', default=False)
+    pfsense_id = models.IntegerField(
+        'ID pfSense',
+        blank=True,
+        null=True,
+        help_text='ID пользователя в pfSense (используется для блокировки)'
+    )
+
+    def __str__(self):
+        return self.login
+
+    @classmethod
+    def get_users_to_block(cls) -> list:
+        if not hasattr(cls, '_users_to_block'):
+            cls._users_to_block = []
+        ad_users = ADUsers.get_users_to_block()
+        for ad_user in ad_users:
+            if ad_user.pfsense:
+                pfsense_user = ad_user.pfsense
+                pfsense_user.status = StatusChoices.INACTIVE
+                cls._users_to_block.append(pfsense_user)
+        return cls._users_to_block
+
+    class Meta:
+        ordering = ('login',)
+        verbose_name = 'Пользователь pfSense'
+        verbose_name_plural = 'Пользователи pfSense'

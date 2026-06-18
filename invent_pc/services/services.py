@@ -1,14 +1,14 @@
 import logging
 from abc import ABC, abstractmethod
 
-from ldap3 import Server, Connection, SUBTREE
-from rocketchat_API.rocketchat import RocketChat
-
+import requests
 from exceptions.services import RadiusUsersNotFoundError
-from users.models import VPN, Radius, ADUsers
+from ldap3 import SUBTREE, Connection, Server
+from rocketchat_API.rocketchat import RocketChat
+from users.models import VPN, ADUsers, PfSenseUser, Radius
 from utils.fix_pywinrm import CustomSession
-from .context_managers import MySQLConnectionManager, MikrotikConnectionManager
 
+from .context_managers import MikrotikConnectionManager, MySQLConnectionManager
 
 logger = logging.getLogger(__name__)
 
@@ -204,3 +204,66 @@ class RocketChatService(ExternalService):
                     'сервере RocketChat.')
             else:
                 logger.info(f'{user} не найден')
+
+
+class PfSenseService(ExternalService):
+    def session(self, host, port, api_token, base_url):
+        """Создать сессию.
+        Возвращает словарь с параметрами для запросов.
+        """
+        return {
+            'base_url': base_url,
+            'headers': {'X-API-Key': api_token},
+            'proxies': {'http': None, 'https': None},
+        }
+
+    def get_users(self, session):
+        """Получить список пользователей pfSense."""
+        url = f"{session['base_url']}/users"
+        response = requests.get(
+            url,
+            headers=session['headers'],
+            timeout=30,
+            proxies=session['proxies']
+        )
+        response.raise_for_status()
+        data = response.json()
+        return data.get('data', [])
+
+    def block_users(self, session, need_disable):
+        """Заблокировать пользователей pfSense."""
+        users = PfSenseUser.get_users_to_block()
+        logger.info(f'Блокировка: {users}')
+
+        if not users or not need_disable:
+            return
+
+        url = f"{session['base_url']}/user"
+        for user in users:
+            if user.pfsense_id is None:
+                logger.warning(
+                    f'У пользователя pfSense {user.login} '
+                    f'отсутствует pfsense_id, пропускаем блокировку.')
+                continue
+            try:
+                response = requests.patch(
+                    url,
+                    headers={
+                        **session['headers'],
+                        'Content-Type': 'application/json'
+                    },
+                    json={'id': user.pfsense_id, 'disabled': True},
+                    timeout=30,
+                    proxies=session['proxies']
+                )
+                response.raise_for_status()
+                logger.info(
+                    f'Пользователь pfSense {user.login} '
+                    f'(id={user.pfsense_id}) отключен.')
+            except Exception as error:
+                logger.exception(
+                    f'Ошибка при блокировке пользователя '
+                    f'pfSense {user.login}: {error}'
+                )
+
+        PfSenseUser.objects.bulk_update(users, ['status'])

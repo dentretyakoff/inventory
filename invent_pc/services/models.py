@@ -199,3 +199,44 @@ class RocketChat(BaseService):
         ordering = ('id',)
         verbose_name = 'RocketChat'
         verbose_name_plural = 'RocketChat'
+
+
+class PfSense(models.Model):
+    """Модель для хранения реквизитов подключения к pfSense."""
+    name = models.CharField(
+        'Название',
+        max_length=255,
+        help_text='Произвольное название сервера'
+    )
+    host = models.CharField(
+        'Сервер',
+        max_length=255,
+        help_text='IP-адрес или dns-имя сервера'
+    )
+    port = models.IntegerField('Порт', default=443)
+    api_token = models.CharField('API токен', max_length=255)
+    use_ssl = models.BooleanField('Использовать SSL', default=True)
+    need_disable = models.BooleanField(
+        'Блокировать учетные записи', default=False)
+    active = models.BooleanField(
+        'Активен',
+        default=True,
+        help_text='Подключение происходит только к активному сервису'
+    )
+
+    def __str__(self):
+        return self.name
+
+    def credentials(self):
+        protocol = 'https' if self.use_ssl else 'http'
+        return {
+            'host': self.host,
+            'port': self.port,
+            'api_token': self.api_token,
+            'base_url': f'{protocol}://{self.host}:{self.port}/api/v2',
+        }
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'pfSense'
+        verbose_name_plural = 'pfSense'

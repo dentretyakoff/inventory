@@ -6,53 +6,77 @@
 {% endblock %}
 {% block content %}
   <div class="container">
-    <div class="text-center"><h4>{{ header }}</h4></div>
-    <div class="row">
-      <div class="col">
-        {% include 'users/includes/table_users_report.html' %}
-      </div>
-      <div class="col">
-        <div class="row">
-          <form method="get">
-            <div class="input-group mb-3">
-              <input
-                type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
-                aria-describedby="button-addon2" name="q"
-              >
-              <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
-            </div>
-          </form>
+    <div class="d-flex align-items-center mb-1">
+      <h4 class="mb-0 flex-grow-1 text-center">{{ header }}</h4>
+
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#usersTopPanel"
+        aria-expanded="true"
+        aria-controls="usersTopPanel"
+        title="Свернуть/развернуть панель">
+        &#9660;&#9650;
+      </button>
+    </div>
+
+    <div class="collapse show" id="usersTopPanel">
+      <div class="row">
+        <div class="col">
+          {% include 'users/includes/table_users_report.html' %}
         </div>
         <div class="col">
-          <button class="btn btn-outline-primary btn-sm update-users-button">Обновить данные &#128257;</button>
-          <a 
-            href="{% url 'users:generate_users_report' %}"
-            class="btn btn-outline-primary btn-sm"
-            title="Сохраняет список учтеных записей AD в Excel, у которых есть хотябы одна связная учетная запись Radius или VPN"
-          >Active Directory &#128190;</a>
-          <a
-            href="{% url 'users:generate_radius_report' %}"
-            class="btn btn-outline-primary btn-sm"
-            title="Сохраняет список свободных учетных записей Radius"
-          >Radius &#128190;</a>
-          <a
-            href="{% url 'users:generate_vpn_report' %}"
-            class="btn btn-outline-primary btn-sm"
-            title="Сохраняет список свободных учетных записей VPN"
-          >VPN &#128190;</a>
+          <div class="row">
+            <form method="get">
+              <div class="input-group mb-3">
+                <input
+                  type="text" class="form-control" placeholder="Поиск" aria-label="Поиск"
+                  aria-describedby="button-addon2" name="q"
+                >
+                <button class="btn btn-outline-primary btn-sm" type="submit" id="button-addon2">&#128269;</button>
+              </div>
+            </form>
+          </div>
+          <div class="col">
+            <button class="btn btn-outline-primary btn-sm update-users-button">Обновить данные &#128257;</button>
+            <a 
+              href="{% url 'users:generate_users_report' %}"
+              class="btn btn-outline-primary btn-sm"
+              title="Сохраняет список учтеных записей AD в Excel, у которых есть хотябы одна связная учетная запись Radius или VPN"
+            >Active Directory &#128190;</a>
+            <a
+              href="{% url 'users:generate_radius_report' %}"
+              class="btn btn-outline-primary btn-sm"
+              title="Сохраняет список свободных учетных записей Radius"
+            >Radius &#128190;</a>
+            <a
+              href="{% url 'users:generate_vpn_report' %}"
+              class="btn btn-outline-primary btn-sm"
+              title="Сохраняет список свободных учетных записей VPN"
+            >VPN &#128190;</a>
+            <a
+              href="{% url 'users:generate_pfsense_report' %}"
+              class="btn btn-outline-primary btn-sm"
+              title="Сохраняет список свободных учетных записей PfSense"
+            >PfSense &#128190;</a>
+          </div>
+          <div id="loading-indicator" style="display: none;">Обновление данных... &#8987;</div>
+          <div id="success-message" style="display: none; color: green;"></div>
+          <div id="error-message" style="display: none; color: red;"></div>
         </div>
-        <div id="loading-indicator" style="display: none;">Обновление данных... &#8987;</div>
-        <div id="success-message" style="display: none; color: green;"></div>
-        <div id="error-message" style="display: none; color: red;"></div>
       </div>
-    </div>
+    
     <div class="row mb-1">
       <div class="col">
         {% include 'users/includes/buttons_types_users.html' %}
       </div>
       <div class="col">
-        <div class="float-end">Записей на странице: <b>{{ page_obj|length }}</b></div>
+        <div class="float-end">
+          Записей на странице: <b>{{ page_obj|length }}</b>
+        </div>
       </div>
+    </div>
     </div>
   </div>
   {% include table_template %}

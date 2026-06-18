@@ -1,25 +1,34 @@
 import json
 import logging
 
-from django.db.models import Q
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
 from rest_framework import status
 
-from exceptions.services import MissingVariableError, RadiusUsersNotFoundError
-
-from .filters import (UsersFilter, RadiusUsersFilter,
-                      VPNUsersFilter, GigroUsersFilter)
-from .models import VPN, ADUsers, Radius, Gigrotermon
-from .utils import (get_file, get_radius_file,
-                    get_vpn_file, get_users_base_context)
-from .update_gigrotermon import update_gigrotermon
+from .filters import (
+    GigroUsersFilter,
+    PfSenseUsersFilter,
+    RadiusUsersFilter,
+    UsersFilter,
+    VPNUsersFilter,
+)
+from .models import VPN, ADUsers, Gigrotermon, PfSenseUser, Radius
 from .update_ad import update_ad
-from .update_vpn import update_vpn
+from .update_gigrotermon import update_gigrotermon
+from .update_pfsense import update_pfsense
 from .update_radius import update_radius
 from .update_rocket import update_rocket
+from .update_vpn import update_vpn
+from .utils import (
+    get_file,
+    get_pfsense_file,
+    get_radius_file,
+    get_users_base_context,
+    get_vpn_file,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +37,7 @@ logger = logging.getLogger(__name__)
 def users_main(request):
     """Список всех учетных записей из AD."""
     ad_users = (ADUsers.objects.all()
-                .select_related('rdlogin', 'vpn')
+                .select_related('rdlogin', 'vpn', 'pfsense')
                 .prefetch_related('gigro'))
     user_filter = UsersFilter(request.GET, queryset=ad_users)
     context = get_users_base_context(request, user_filter)
@@ -75,11 +84,27 @@ def users_gigro(request):
 
 
 @login_required
+def users_pfsense(request):
+    """Список всех учетных записей PfSense."""
+    pfsense_users = PfSenseUser.objects.all().prefetch_related('ad_user')
+    user_filter = PfSenseUsersFilter(request.GET, queryset=pfsense_users)
+    context = get_users_base_context(request, user_filter)
+    context['header'] = 'VPN(Pfsense)'
+    context['table_template'] = 'users/includes/table_users_pfsense.html'
+
+    return render(request, 'users/users.html', context)
+
+
+@login_required
 def edit_user(request):
     """Редактирование связаных учетных записей пользователя."""
     if request.method == 'POST':
         ad_user_id = request.POST.get('ad_user_id')
-        login_id = request.POST.get('rdlogin_id') or request.POST.get('vpn_id')
+        login_id = (
+            request.POST.get('rdlogin_id')
+            or request.POST.get('vpn_id')
+            or request.POST.get('pfsense_id')
+        )
         field = request.POST.get('field')
         ad_user = ADUsers.objects.get(id=ad_user_id)
         setattr(ad_user, field, login_id)
@@ -114,6 +139,14 @@ def get_vpns(request):
 
 
 @login_required
+def get_pfsenses(request):
+    """Получить список доступных учетных записей PfSense."""
+    pfsenses = list(PfSenseUser.objects.filter(
+        ad_user=None).values('id', 'login'))
+    return JsonResponse(pfsenses, safe=False)
+
+
+@login_required
 def update_users_data(request):
     """Обновляет учетные данные из внешних систем.
     - Active Directory
@@ -127,6 +160,7 @@ def update_users_data(request):
         update_vpn()
         update_radius()
         update_gigrotermon()
+        update_pfsense()
 
     except (MissingVariableError, RadiusUsersNotFoundError) as error:
         logger.error(str(error))
@@ -144,6 +178,7 @@ def update_users_data(request):
         ADUsers.clear_users_for_blocking()
         Radius.clear_users_for_blocking()
         VPN.clear_users_for_blocking()
+        PfSenseUser.clear_users_for_blocking()
     return JsonResponse({'success': True}, status=status.HTTP_200_OK)
 
 
@@ -190,6 +225,22 @@ def generate_vpn_report(request):
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  # noqa
     response['Content-Disposition'] = 'attachment; filename="vpn_users_report.xlsx"'  # noqa
+
+    excel_file.save(response)
+
+    return response
+
+
+@login_required
+def generate_pfsense_report(request):
+    """Формирует список свободных учетных записей PfSense,
+    отдает файлом Excel."""
+    users = PfSenseUser.objects.filter(ad_user__isnull=True)
+
+    excel_file = get_pfsense_file(users)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')  # noqa
+    response['Content-Disposition'] = 'attachment; filename="pfsense_users_report.xlsx"'  # noqa
 
     excel_file.save(response)
 

@@ -19,7 +19,11 @@
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="rdlogin" value="active">&#9989;</button>
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="rdlogin" value="inactive">&#10060;</button>
       </th>
-      <th>Логин VPN
+      <th>Логин VPN(Pfsense)
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="pfsense" value="active">&#9989;</button>
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="pfsense" value="inactive">&#10060;</button>
+      </th>
+      <th>Логин VPN(микротик)
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="vpn" value="active">&#9989;</button>
         <button class="btn btn-sm btn-outline-secondary" type="submit" name="vpn" value="inactive">&#10060;</button>
       </th>
@@ -59,6 +63,21 @@
           {% endif %}
         </span>
         <select name="rdlogin" class="form-control edit-select" style="display: none;"></select>
+      </td>
+      <td class="editable-field">
+        <button class="btn btn-sm edit-pfsense-btn">&#128221;</button>
+        <button class="btn btn-sm delete-pfsense-btn">&#128465;</button>
+        <button class="btn btn-sm save-pfsense-btn" style="display: none;">&#128190;</button>
+        <button class="btn btn-sm cancel-pfsense-btn" style="display: none;">&#10006;</button>
+        <span class="current-value pfsense-value">
+          {{ user.pfsense|default_if_none:"-" }}
+          {% if user.pfsense.status == 'active' %}
+            <span>&#9989;</span>
+          {% elif user.pfsense.status == 'inactive'  %}
+            <span>&#10060;</span>
+          {% endif %}
+        </span>
+        <select name="pfsense" class="form-control edit-select" style="display: none;"></select>
       </td>
       <td class="editable-field">
         <button class="btn btn-sm edit-vpn-btn">&#128221;</button>

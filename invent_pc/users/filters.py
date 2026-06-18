@@ -20,6 +20,7 @@ class UsersFilter(BaseFilter):
     """Фильтр по учетным записям AD."""
     rdlogin = django_filters.CharFilter(field_name='rdlogin__status')
     vpn = django_filters.CharFilter(field_name='vpn__status')
+    pfsense = django_filters.CharFilter(field_name='pfsense__status')
     gigro = django_filters.CharFilter(method='filter_gigro')
     email = django_filters.BooleanFilter(
         field_name='email', method='filter_email')
@@ -31,7 +32,8 @@ class UsersFilter(BaseFilter):
                 Q(login__icontains=value) |
                 Q(email__icontains=value) |
                 Q(rdlogin__login__icontains=value) |
-                Q(vpn__login__icontains=value)
+                Q(vpn__login__icontains=value) |
+                Q(pfsense__login__icontains=value)
             )
         return queryset
 
@@ -62,6 +64,16 @@ class VPNUsersFilter(BaseFilter):
         if value:
             return queryset.filter(
                 Q(comment__icontains=value) | Q(login__icontains=value)
+            )
+        return queryset
+
+
+class PfSenseUsersFilter(BaseFilter):
+    """Фильтр по учетным записям PfSense."""
+    def filter_all_fields(self, queryset, name, value):
+        if value:
+            return queryset.filter(
+                Q(description__icontains=value) | Q(login__icontains=value)
             )
         return queryset
 

@@ -1,9 +1,9 @@
 import openpyxl
-from django_filters import FilterSet
 from django.db.models import Model
-
+from django_filters import FilterSet
 from utils.utils import get_counters, get_pages
-from .models import ADUsers, Radius, VPN, StatusChoices
+
+from .models import VPN, ADUsers, PfSenseUser, Radius, StatusChoices
 
 
 def update_or_create_users(
@@ -49,7 +49,8 @@ def get_file(users: ADUsers) -> openpyxl.Workbook:
     """Создает Excel со связными учетными записями."""
     title = 'Список учетных записей'
     headers = ['№', 'ФИО', 'Логин', 'Email',
-               'Wi-Fi', 'VPN логин', 'VPN комментарий']
+               'Wi-Fi', 'VPN(Pfsense) логин', 'VPN(микротик) логин',
+               'VPN(микротик) комментарий']
     wb = make_clean_wb(title, headers)
     ws = wb.active
 
@@ -60,15 +61,16 @@ def get_file(users: ADUsers) -> openpyxl.Workbook:
             user.login,
             user.email,
             getattr(user.rdlogin, 'login', '-'),
+            getattr(user.pfsense, 'login', '-'),
             getattr(user.vpn, 'login', '-'),
             getattr(user.vpn, 'comment', '-')
         ])
 
         statuses = {
-            # ws.cell(row= , column=)
             ws.cell(num+1, 3): getattr(user, 'status', None),
             ws.cell(num+1, 5): getattr(user.rdlogin, 'status', None),
-            ws.cell(num+1, 6): getattr(user.vpn, 'status', None)
+            ws.cell(num+1, 6): getattr(user.pfsense, 'status', None),
+            ws.cell(num+1, 7): getattr(user.vpn, 'status', None)
         }
         for cell, status in statuses.items():
             if status == StatusChoices.INACTIVE:
@@ -110,27 +112,52 @@ def get_vpn_file(users: VPN) -> openpyxl.Workbook:
     return wb
 
 
+def get_pfsense_file(users: PfSenseUser) -> openpyxl.Workbook:
+    """Создает Excel со свободными учетными записями PfSense."""
+    title = 'Список учетных записей'
+    headers = ['№', 'Логин', 'Описание']
+    wb = make_clean_wb(title, headers)
+    ws = wb.active
+
+    for num, user in enumerate(users, 1):
+        ws.append([num, user.login, user.description])
+        if user.status == StatusChoices.INACTIVE:
+            ws.cell(num+1, 2).fill = openpyxl.styles.PatternFill(
+                'solid', fgColor='FF0000')  # Красный
+
+    return wb
+
+
 def get_users_base_context(request, user_filter: FilterSet) -> dict[any]:
     """Формирует базовый context для страниц учетных записей."""
     ad_users = (ADUsers.objects.all()
-                .select_related('rdlogin', 'vpn')
+                .select_related('rdlogin', 'vpn', 'pfsense')
                 .prefetch_related('gigro'))
-    related_statuses = ad_users.values('rdlogin__status', 'vpn__status')
+    related_statuses = ad_users.values(
+        'rdlogin__status', 'vpn__status', 'pfsense__status'
+    )
     unrelated_radius_statuses = (Radius.objects
                                  .filter(ad_user__isnull=True)
                                  .values('status'))
     unrelated_vpn_statuses = (VPN.objects
                               .filter(ad_user__isnull=True)
                               .values('status'))
+    unrelated_pfsense_statuses = (PfSenseUser.objects
+                                  .filter(ad_user__isnull=True)
+                                  .values('status'))
 
     ad_users_statuses = get_counters(ad_users.values('status'), 'status')
     radius_users_statuses = get_counters(related_statuses, 'rdlogin__status')
     vpn_users_statuses = get_counters(related_statuses, 'vpn__status')
+    pfsense_users_statuses = get_counters(
+        related_statuses, 'pfsense__status')
 
     unrelated_radius_users_statuses = get_counters(
         unrelated_radius_statuses, 'status')
     unrelated_vpn_users_statuses = get_counters(
         unrelated_vpn_statuses, 'status')
+    unrelated_pfsense_users_statuses = get_counters(
+        unrelated_pfsense_statuses, 'status')
 
     page_obj = get_pages(request, user_filter.qs)
     current_query_params = request.GET.copy()
@@ -141,8 +168,10 @@ def get_users_base_context(request, user_filter: FilterSet) -> dict[any]:
         'ad_users_statuses': ad_users_statuses,
         'radius_users_statuses': radius_users_statuses,
         'vpn_users_statuses': vpn_users_statuses,
+        'pfsense_users_statuses': pfsense_users_statuses,
         'unrelated_radius_users_statuses': unrelated_radius_users_statuses,
         'unrelated_vpn_users_statuses': unrelated_vpn_users_statuses,
+        'unrelated_pfsense_users_statuses': unrelated_pfsense_users_statuses,
         'current_query_params': current_query_params,
     }
 

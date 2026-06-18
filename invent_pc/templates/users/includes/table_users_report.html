@@ -40,7 +40,20 @@
     <td>{{ unrelated_radius_users_statuses.total }}</td>
     </tr>
     <tr style="text-align: center">
-    <td style="text-align: left">VPN</td>
+    <td style="text-align: left">VPN(Pfsense)</td>
+    <td class="{% if request.GET.pfsense == 'active' %}bold-text{% endif %}">
+        {{ pfsense_users_statuses.active }}
+    </td>
+    <td>{{ unrelated_pfsense_users_statuses.active }}</td>
+    <td class="{% if request.GET.pfsense == 'inactive' %}bold-text{% endif %}">
+        {{ pfsense_users_statuses.inactive }}
+    </td>
+    <td>{{ unrelated_pfsense_users_statuses.inactive }}</td>
+    <td>{{ pfsense_users_statuses.total }}</td>
+    <td>{{ unrelated_pfsense_users_statuses.total }}</td>
+    </tr>
+    <tr style="text-align: center">
+    <td style="text-align: left">VPN(микротик)</td>
     <td class="{% if request.GET.vpn == 'active' %}bold-text{% endif %}">
         {{ vpn_users_statuses.active }}
     </td>

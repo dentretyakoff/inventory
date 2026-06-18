@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.contrib import admin, messages
-
 from exceptions.services import EncryptionKeyMissingError
+
 from .models import (
-    MySQLDatabase,
     ActiveDirectory,
     Mikrotik,
+    MySQLDatabase,
+    PfSense,
     RadiusServer,
-    RocketChat
+    RocketChat,
 )
 
 
@@ -148,6 +149,31 @@ class RocketChatAdmin(BaseServiceAdmin):
         'host',
         'user',
         'password',
+        'need_disable',
+        'active'
+    )
+    list_display_links = ('id', 'name')
+    search_fields = ('name',)
+    list_filter = ('active',)
+
+
+@admin.register(PfSense)
+class PfSenseAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'host',
+        'port',
+        'use_ssl',
+        'need_disable',
+        'active'
+    )
+    fields = (
+        'name',
+        'host',
+        'port',
+        'api_token',
+        'use_ssl',
         'need_disable',
         'active'
     )

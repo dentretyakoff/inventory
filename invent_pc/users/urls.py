@@ -1,5 +1,5 @@
-from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.urls import path
 
 from . import views
 
@@ -10,6 +10,7 @@ urlpatterns = [
     path('edit-user/', views.edit_user, name='edit_user'),
     path('get-rdlogins/', views.get_rdlogins, name='get_rdlogins'),
     path('get-vpns/', views.get_vpns, name='get_vpns'),
+    path('get-pfsenses/', views.get_pfsenses, name='get_pfsenses'),
     path('update-users-data/',
          views.update_users_data,
          name='update_users_data'),
@@ -22,6 +23,9 @@ urlpatterns = [
     path('generate-vpn-report/',
          views.generate_vpn_report,
          name='generate_vpn_report'),
+    path('generate-pfsense-report/',
+         views.generate_pfsense_report,
+         name='generate_pfsense_report'),
     path('login/', auth_views.LoginView.as_view(
         template_name='users/registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(
@@ -30,4 +34,5 @@ urlpatterns = [
     path('radius/', views.users_radius, name='users_radius'),
     path('vpn/', views.users_vpn, name='users_vpn'),
     path('gigro/', views.users_gigro, name='users_gigro'),
+    path('pfsense/', views.users_pfsense, name='users_pfsense'),
 ]

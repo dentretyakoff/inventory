@@ -94,6 +94,33 @@ $(document).ready(function() {
         row.find('.cancel-vpn-btn').show();
     });
 
+    $('.edit-pfsense-btn').click(function() {
+        var row = $(this).closest('tr');
+        var pfsenseSelect = row.find('select[name="pfsense"]');
+
+        pfsenseSelect.select2({
+                width: '50%',
+                dropdownAutoWidth: true
+            });
+
+        $.getJSON('/users/get-pfsenses/', function(pfsenses) {
+            pfsenseSelect.empty();
+            $.each(pfsenses, function(index, pfsense) {
+                pfsenseSelect.append($('<option>', {
+                    value: pfsense.id,
+                    text: pfsense.login
+                }));
+            });
+            pfsenseSelect.trigger('change');
+            pfsenseSelect.select2('open');
+        });
+
+        $(this).hide();
+        row.find('.delete-pfsense-btn').hide();
+        row.find('.save-pfsense-btn').show();
+        row.find('.cancel-pfsense-btn').show();
+    });
+
     $('.cancel-rdlogin-btn').click(function() {
         var row = $(this).closest('tr');
         row.find('.rdlogin-value').show();
@@ -112,6 +139,16 @@ $(document).ready(function() {
         row.find('.delete-vpn-btn').show();
         row.find('.save-vpn-btn').hide();
         row.find('.cancel-vpn-btn').hide();
+    });
+
+    $('.cancel-pfsense-btn').click(function() {
+        var row = $(this).closest('tr');
+        row.find('.pfsense-value').show();
+        row.find('select[name="pfsense"]').select2('destroy').hide();
+        row.find('.edit-pfsense-btn').show();
+        row.find('.delete-pfsense-btn').show();
+        row.find('.save-pfsense-btn').hide();
+        row.find('.cancel-pfsense-btn').hide();
     });
 
     $('.save-rdlogin-btn').click(function() {
@@ -170,6 +207,34 @@ $(document).ready(function() {
         }
     });
 
+    $('.save-pfsense-btn').click(function() {
+        var row = $(this).closest('tr');
+        var userId = row.data('user-id');
+        var pfsenseId = row.find('select[name="pfsense"]').val();
+
+        if (pfsenseId) {
+            $.ajax({
+                url: edit_user_url,
+                method: 'POST',
+                data: {
+                    'ad_user_id': userId,
+                    'field': 'pfsense_id',
+                    'pfsense_id': pfsenseId,
+                    'csrfmiddlewaretoken': csrf_token
+                },
+                success: function(response) {
+                    var selectedText = row.find('select[name="pfsense"] option:selected').text();
+                    row.find('.pfsense-value').text(selectedText).show();
+                    row.find('select[name="pfsense"]').select2('destroy').hide();
+                    row.find('.edit-pfsense-btn').show();
+                    row.find('.delete-pfsense-btn').show();
+                    row.find('.save-pfsense-btn').hide();
+                    row.find('.cancel-pfsense-btn').hide();
+                }
+            });
+        }
+    });
+
     $('.delete-rdlogin-btn').click(function() {
         var row = $(this).closest('tr');
         var userId = row.data('user-id');
@@ -221,6 +286,34 @@ $(document).ready(function() {
                     row.find('.edit-vpn-btn').show();
                     row.find('.save-vpn-btn').hide();
                     row.find('.cancel-vpn-btn').hide();
+                }
+            });
+        }
+    });
+
+    $('.delete-pfsense-btn').click(function() {
+        var row = $(this).closest('tr');
+        var userId = row.data('user-id');
+        var pfsenseValue = row.find('.pfsense-value').text();
+
+        if (pfsenseValue !== '-') {
+            $.ajax({
+                url: edit_user_url,
+                method: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    'ad_user_id': userId,
+                    'field': 'pfsense'
+                }),
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
+                success: function(response) {
+                    row.find('.pfsense-value').text('-').show();
+                    row.find('select[name="pfsense"]').select2('destroy').hide();
+                    row.find('.edit-pfsense-btn').show();
+                    row.find('.save-pfsense-btn').hide();
+                    row.find('.cancel-pfsense-btn').hide();
                 }
             });
         }
